@@ -574,4 +574,13 @@ function init(){
   if(!window.DeviceOrientationEvent){
     btn.textContent='不支持传感器';
     btn.disabled=true;btn.style.opacity='.6';
-  }else{btn.addEventListener('click',
+  }else{btn.addEventListener('click',ask);}
+  window.addEventListener('resize',function(){resizeCanvas();update(fHeading);});
+  window.addEventListener('orientationchange',function(){setTimeout(function(){resizeCanvas();update(fHeading);},300);});
+}
+window.addEventListener('load',init);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&listening)update(fHeading);});
+})();
+</script>
+</body>
+</html>
