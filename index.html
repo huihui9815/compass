@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🧭 五行八卦 · 指南针</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 30%, #1a1f2e, #0b0d14);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+            padding: 16px;
+            margin: 0;
+            touch-action: none;
+        }
+
+        .compass-wrapper {
+            background: rgba(20, 25, 35, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: 64px;
+            padding: 28px 24px 38px 24px;
+            box-shadow: 0 30px 45px -15px rgba(0, 0, 0, 0.9), inset 0 1px 3px rgba(255, 215, 140, 0.15);
+            border: 1px solid rgba(255, 215, 140, 0.3);
+            max-width: 620px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .title {
+            text-align: center;
+            color: #d9c9a8;
+            font-weight: 400;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        .compass-canvas-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        canvas#compassCanvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            border-radius: 50%;
+            filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.9));
+            transition: filter 0.3s;
+            cursor: default;
+        }
+
+        .heading-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 16px;
+        }
+
+        .degrees {
+            font-size: 3.4rem;
+            font-weight: 600;
+            color: #f3e6d0;
+            text-shadow: 0 4px 12px #00000080, 0 0 20px #f0d09040;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .direction-label {
+            font-size: 1.3rem;
+            letter-spacing: 3px;
+            font-weight: 400;
+            color: #d4c5a6;
+            text-transform: uppercase;
+            margin-top: 4px;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 6px 24px;
+            border-radius: 40px;
+            border: 1px solid #ffd98c30;
+            backdrop-filter: blur(4px);
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        .element-label {
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            color: #a89e8a;
+            margin-top: 4px;
+            background: rgba(30, 25, 20, 0.5);
+            padding: 4px 20px;
+            border-radius: 30px;
+            border: 1px solid #c9b07a30;
+        }
+
+        .sensor-note {
+            text-align: center;
+            color: #7a7f8b;
+            font-size: 0.75rem;
+            margin-top: 14px;
+            letter-spacing: 1px;
+            height: 18px;
+        }
+
+        .permission-btn {
+            margin-top: 16px;
+            background: #2e2f3a;
+            border: none;
+            border-radius: 60px;
+            color: #e6dbc9;
+            font-size: 0.9rem;
+            padding: 12px 28px;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 18px -6px #00000080, inset 0 1px 1px #ffffff20;
+            transition: all 0.15s;
+            cursor: pointer;
+            border: 1px solid #ffd98c40;
+            display: inline-block;
+            width: auto;
+            align-self: center;
+        }
+
+        .permission-btn:hover {
+            background: #3d3f4d;
+            color: #ffffff;
+            border-color: #ffd98c90;
+            transform: scale(1.01);
+        }
+
+        .permission-btn:active {
+            background: #1e1f28;
+            transform: scale(0.98);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .flex-center {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+<div class="compass-wrapper">
+    <div class="title">· 太 极 八 卦 ·</div>
+
+    <div class="compass-canvas-container">
+        <canvas id="compassCanvas" width="700" height="700"></canvas>
+    </div>
+
+    <div class="heading-info">
+        <div class="degrees" id="degreeDisplay">0°</div>
+        <div class="direction-label" id="directionLabel">北</div>
+        <div class="element-label" id="elementDisplay">水 · 玄武</div>
+    </div>
+
+    <div class="sensor-note" id="statusMessage">正在等待传感器数据…</div>
+
+    <div class="flex-center">
+        <button class="permission-btn" id="enableBtn">🧭 点击启用指南针</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('compassCanvas');
+        const ctx = canvas.getContext('2d');
+        const degreeDisplay = document.getElementById('degreeDisplay');
+        const directionLabel = document.getElementById('directionLabel');
+        const elementDisplay = document.getElementById('elementDisplay');
+        const statusMessage = document.getElementById('statusMessage');
+        const enableBtn = document.getElementById('enableBtn');
+
+        let currentHeading = 0;
+        let filteredHeading = 0;
+        let sensorActive = false;
+        let lastEventTime = 0;
+        let isListening = false;
+        const FILTER_FACTOR = 0.18;
+
+        // ----- 五行方位对应 (后天八卦) -----
+        function getDirectionText(deg) {
+            const d = ((deg % 360) + 360) % 360;
+            if (d >= 337.5 || d < 22.5) return '北';
+            if (d >= 22.5 && d < 67.5) return '东北';
+            if (d >= 67.5 && d < 112.5) return '东';
+            if (d >= 112.5 && d < 157.5) return '东南';
+            if (d >= 157.5 && d < 202.5) return '南';
+            if (d >= 202.5 && d < 247.5) return '西南';
+            if (d >= 247.5 && d < 292.5) return '西';
+            if (d >= 292.5 && d < 337.5) return '西北';
+            return '北';
+        }
+
+        // 五行与神兽对应 (根据后天八卦方位)
+        function getElementInfo(deg) {
+            const d = ((deg % 360) + 360) % 360;
+            // 北: 水 玄武, 东北: 土 螣蛇/勾陈, 东: 木 青龙, 东南: 木 青龙, 南: 火 朱雀, 西南: 土 螣蛇/勾陈, 西: 金 白虎, 西北: 金 白虎
+            if (d >= 337.5 || d < 22.5) return '水 · 玄武';
+            if (d >= 22.5 && d < 67.5) return '土 · 螣蛇';
+            if (d >= 67.5 && d < 112.5) return '木 · 青龙';
+            if (d >= 112.5 && d < 157.5) return '木 · 青龙';
+            if (d >= 157.5 && d < 202.5) return '火 · 朱雀';
+            if (d >= 202.5 && d < 247.5) return '土 · 勾陈';
+            if (d >= 247.5 && d < 292.5) return '金 · 白虎';
+            if (d >= 292.5 && d < 337.5) return '金 · 白虎';
+            return '水 · 玄武';
+        }
+
+        // 八卦符号 (后天八卦方位)
+        function getBaguaSymbol(deg) {
+            const d = ((deg % 360) + 360) % 360;
+            // 后天八卦: 坎北, 艮东北, 震东, 巽东南, 离南, 坤西南, 兑西, 乾西北
+            if (d >= 337.5 || d < 22.5) return '☵'; // 坎
+            if (d >= 22.5 && d < 67.5) return '☶'; // 艮
+            if (d >= 67.5 && d < 112.5) return '☳'; // 震
+            if (d >= 112.5 && d < 157.5) return '☴'; // 巽
+            if (d >= 157.5 && d < 202.5) return '☲'; // 离
+            if (d >= 202.5 && d < 247.5) return '☷'; // 坤
+            if (d >= 247.5 && d < 292.5) return '☱'; // 兑
+            if (d >= 292.5 && d < 337.5) return '☰'; // 乾
+            return '☵';
+        }
+
+        // ----- 绘制太极图 (在中心区域) -----
+        function drawTaiji(ctx, cx, cy, radius) {
+            // 绘制黑白太极
+            const r = radius * 0.22; // 太极半径
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            // 白色半圆 (阳)
+            ctx.beginPath();
+            ctx.arc(0, 0, r, -Math.PI/2, Math.PI/2);
+            ctx.fillStyle = '#f0e6d2';
+            ctx.fill();
+
+            // 黑色半圆 (阴)
+            ctx.beginPath();
+            ctx.arc(0, 0, r, Math.PI/2, -Math.PI/2);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fill();
+
+            // 上方小圆 (阴中有阳)
+            ctx.beginPath();
+            ctx.arc(0, -r/2, r/2, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fill();
+
+            // 下方小圆 (阳中有阴)
+            ctx.beginPath();
+            ctx.arc(0, r/2, r/2, 0, Math.PI * 2);
+            ctx.fillStyle = '#f0e6d2';
+            ctx.fill();
+
+            // 太极眼
+            ctx.beginPath();
+            ctx.arc(0, -r/2, r/6, 0, Math.PI * 2);
+            ctx.fillStyle = '#f0e6d2';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, r/2, r/6, 0, Math.PI * 2);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // ----- 绘制八卦符号环 -----
+        function drawBaguaRing(ctx, cx, cy, radius, headingDeg) {
+            const baguaSymbols = ['☰', '☱', '☲', '☳', '☴', '☵', '☶', '☷']; // 先天八卦顺序 乾兑离震巽坎艮坤
+            // 后天八卦排列: 乾西北, 坎北, 艮东北, 震东, 巽东南, 离南, 坤西南, 兑西
+            // 按照后天八卦方位排列符号
+            const symbols = [
+                { symbol: '☵', angle: 0 },    // 坎 北
+                { symbol: '☶', angle: 45 },   // 艮 东北
+                { symbol: '☳', angle: 90 },   // 震 东
+                { symbol: '☴', angle: 135 },  // 巽 东南
+                { symbol: '☲', angle: 180 },  // 离 南
+                { symbol: '☷', angle: 225 },  // 坤 西南
+                { symbol: '☱', angle: 270 },  // 兑 西
+                { symbol: '☰', angle: 315 }   // 乾 西北
+            ];
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.font = `${radius * 0.16}px "Segoe UI Symbol", "Apple Symbols", "Noto Sans Symbols", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            symbols.forEach(item => {
+                const rad = (item.angle * Math.PI) / 180;
+                const x = Math.sin(rad) * radius * 0.66;
+                const y = -Math.cos(rad) * radius * 0.66;
+                // 八卦符号颜色
+                ctx.fillStyle = '#c9b07a';
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 8;
+                ctx.fillText(item.symbol, x, y);
+            });
+            ctx.restore();
+        }
+
+        // ----- 绘制定向罗盘 (含五行八卦) -----
+        function drawCompass(headingDeg) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const radius = Math.min(w, h) * 0.42;
+            const outerRing = radius * 1.02;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // ---- 深色底盘 ----
+            const bgGrad = ctx.createRadialGradient(cx, cy, radius * 0.1, cx, cy, radius * 1.5);
+            bgGrad.addColorStop(0, '#1b1e28');
+            bgGrad.addColorStop(0.7, '#0f1119');
+            bgGrad.addColorStop(1, '#07090e');
+            ctx.beginPath();
+            ctx.arc(cx, cy, outerRing, 0, Math.PI * 2);
+            ctx.fillStyle = bgGrad;
+            ctx.fill();
+            ctx.strokeStyle = '#5a4e3a30';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // ---- 外圈金属边框 ----
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#b89e6c';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 0.92, 0, Math.PI * 2);
+            ctx.strokeStyle = '#e5d7b3';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+
+            // 八卦内圈
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 0.78, 0, Math.PI * 2);
+            ctx.strokeStyle = '#8f846b';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            // ---- 绘制八卦符号环 (在半径0.66位置) ----
+            drawBaguaRing(ctx, cx, cy, radius, headingDeg);
+
+            // ---- 刻度 ----
+            ctx.save();
+            ctx.translate(cx, cy);
+            const tickOuter = radius * 0.91;
+            const tickInnerMajor = radius * 0.78;
+            const tickInnerMinor = radius * 0.83;
+
+            for (let i = 0; i < 360; i += 10) {
+                const rad = (i * Math.PI) / 180;
+                const isMajor = i % 30 === 0;
+                const isCardinal = i % 90 === 0;
+
+                ctx.beginPath();
+                const outerX = Math.sin(rad) * tickOuter;
+                const outerY = -Math.cos(rad) * tickOuter;
+                let innerX, innerY;
+
+                if (isMajor) {
+                    innerX = Math.sin(rad) * tickInnerMajor;
+                    innerY = -Math.cos(rad) * tickInnerMajor;
+                    ctx.strokeStyle = isCardinal ? '#e6c27a' : '#c8b58a';
+                    ctx.lineWidth = isCardinal ? 4 : 2.8;
+                } else {
+                    innerX = Math.sin(rad) * tickInnerMinor;
+                    innerY = -Math.cos(rad) * tickInnerMinor;
+                    ctx.strokeStyle = '#b8a888';
+                    ctx.lineWidth = 1.4;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(outerX, outerY);
+                ctx.lineTo(innerX, innerY);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // ---- 度数标签 (含八卦方向) ----
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i < 360; i += 30) {
+                const rad = (i * Math.PI) / 180;
+                const labelRadius = radius * 0.64;
+                const x = Math.sin(rad) * labelRadius;
+                const y = -Math.cos(rad) * labelRadius;
+
+                let label;
+                if (i === 0) label = '北';
+                else if (i === 90) label = '东';
+                else if (i === 180) label = '南';
+                else if (i === 270) label = '西';
+                else label = i + '°';
+
+                ctx.font = `bold ${i % 90 === 0 ? radius * 0.13 : radius * 0.095}px "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif`;
+                ctx.fillStyle = (i === 0) ? '#ffd966' : (i % 90 === 0) ? '#dfd3b8' : '#b0a48c';
+                ctx.shadowColor = '#000000';
+                ctx.shadowBlur = 10;
+                ctx.fillText(label, x, y);
+            }
+            ctx.restore();
+
+            // ---- 绘制太极图在中心 (覆盖指针中心区域) ----
+            // 先画指针再画太极？太极会在指针上方，可以。但指针中心被太极盖住不太好看。
+            // 我们让太极在最上层，但要先画指针，再画太极，这样太极覆盖中心。
+            // 但指针的红色尖端不会被覆盖，效果尚可。
+            // 为了避免太极完全遮挡指针方向感，让太极半径略小，并且指针中心有圆点。
+            // 先画指针
+
+            // ---- 指针 (指向北) ----
+            ctx.save();
+            ctx.translate(cx, cy);
+            const pointerAngle = (-headingDeg * Math.PI) / 180;
+            ctx.rotate(pointerAngle);
+
+            const pointerLength = radius * 0.58;
+            const pointerWidth = radius * 0.12;
+
+            // 红针 (北)
+            ctx.beginPath();
+            ctx.moveTo(0, -pointerLength);
+            ctx.lineTo(pointerWidth * 0.9, 0);
+            ctx.lineTo(0, pointerWidth * 0.6);
+            ctx.lineTo(-pointerWidth * 0.9, 0);
+            ctx.closePath();
+            const redGrad = ctx.createLinearGradient(0, -pointerLength, 0, 0);
+            redGrad.addColorStop(0, '#ff4d4d');
+            redGrad.addColorStop(1, '#b30000');
+            ctx.fillStyle = redGrad;
+            ctx.shadowColor = '#ff0000a0';
+            ctx.shadowBlur = 15;
+            ctx.fill();
+
+            // 白针 (南)
+            ctx.beginPath();
+            ctx.moveTo(0, pointerLength);
+            ctx.lineTo(pointerWidth * 0.9, 0);
+            ctx.lineTo(0, -pointerWidth * 0.6);
+            ctx.lineTo(-pointerWidth * 0.9, 0);
+            ctx.closePath();
+            const whiteGrad = ctx.createLinearGradient(0, pointerLength, 0, 0);
+            whiteGrad.addColorStop(0, '#e0e0e0');
+            whiteGrad.addColorStop(1, '#909090');
+            ctx.fillStyle = whiteGrad;
+            ctx.shadowColor = '#ffffff60';
+            ctx.shadowBlur = 12;
+            ctx.fill();
+
+            ctx.restore();
+
+            // ---- 太极图 (在中心，绘制在指针上方) ----
+            // 太极图稍微小一点，避免遮挡指针识别
+            drawTaiji(ctx, cx, cy, radius * 0.55);
+
+            // ---- 中心装饰圆环 (增加精致感) ----
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.06, 0, Math.PI * 2);
+            ctx.fillStyle = '#c9b07a';
+            ctx.shadowColor = '#ffd96680';
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+
+            // ---- 底部小字: 八卦方位提示 ----
+            ctx.save();
+            ctx.font = `${radius * 0.06}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+            ctx.fillStyle = '#b8a88860';
+            ctx.textAlign = 'center';
+            ctx.fillText('后天八卦 · 五行方位', cx, cy + radius * 0.92);
+            ctx.restore();
+        }
+
+        function updateCompassUI(deg) {
+            const normalized = ((deg % 360) + 360) % 360;
+            degreeDisplay.textContent = Math.round(normalized) + '°';
+            directionLabel.textContent = getDirectionText(normalized);
+            elementDisplay.textContent = getElementInfo(normalized);
+            drawCompass(normalized);
+        }
+
+        function handleOrientation(event) {
+            let heading = null;
+
+            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+                heading = event.webkitCompassHeading;
+            } else if (event.alpha !== undefined && event.alpha !== null) {
+                heading = (360 - event.alpha) % 360;
+            }
+
+            if (heading === null || isNaN(heading)) {
+                statusMessage.textContent = '⚠️ 无法读取方向数据';
+                return;
+            }
+
+            if (!sensorActive) {
+                filteredHeading = heading;
+                sensorActive = true;
+                statusMessage.textContent = '✅ 指南针已激活 · 太极护佑';
+            } else {
+                let diff = heading - filteredHeading;
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+                filteredHeading = (filteredHeading + FILTER_FACTOR * diff + 360) % 360;
+            }
+
+            updateCompassUI(filteredHeading);
+            lastEventTime = Date.now();
+        }
+
+        function startListening() {
+            if (isListening) return;
+
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+                isListening = true;
+                statusMessage.textContent = '📡 正在接收方向数据…';
+            } else {
+                statusMessage.textContent = '❌ 您的浏览器不支持设备方向传感器';
+                enableBtn.classList.add('hidden');
+                updateCompassUI(0);
+                return;
+            }
+
+            setTimeout(() => {
+                if (lastEventTime === 0) {
+                    statusMessage.textContent = '⏳ 等待传感器数据… (请确保设备有方向传感器)';
+                }
+            }, 3000);
+        }
+
+        function requestPermissionAndStart() {
+            if (typeof DeviceOrientationEvent !== 'undefined' &&
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startListening();
+                            enableBtn.classList.add('hidden');
+                        } else {
+                            statusMessage.textContent = '❌ 权限被拒绝，无法使用指南针';
+                            enableBtn.textContent = '重新请求权限';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('权限请求错误:', error);
+                        statusMessage.textContent = '⚠️ 请求权限失败，请重试';
+                    });
+            } else {
+                startListening();
+                enableBtn.classList.add('hidden');
+            }
+        }
+
+        function initialize() {
+            drawCompass(0);
+            degreeDisplay.textContent = '0°';
+            directionLabel.textContent = '北';
+            elementDisplay.textContent = '水 · 玄武';
+            statusMessage.textContent = '点击按钮启用方向传感器';
+
+            if (!window.DeviceOrientationEvent) {
+                statusMessage.textContent = '⚠️ 当前环境不支持方向传感器';
+                enableBtn.textContent = '不支持传感器';
+                enableBtn.disabled = true;
+                enableBtn.style.opacity = '0.6';
+                enableBtn.style.cursor = 'not-allowed';
+            } else {
+                enableBtn.addEventListener('click', requestPermissionAndStart);
+            }
+
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                console.warn('非安全上下文，传感器可能受限');
+            }
+        }
+
+        window.addEventListener('load', initialize);
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isListening) {
+                updateCompassUI(filteredHeading);
+            }
+        });
+    })();
+</script>
+</body>
+</html>
