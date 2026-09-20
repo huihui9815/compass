@@ -16,71 +16,118 @@ body{
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
   touch-action:none;
 }
-#wrap{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:12px;font-size:.85rem;margin-bottom:2px;opacity:.95}
+#wrap{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:10px;font-size:.8rem;margin-bottom:2px;opacity:.9}
 #cvWrap{position:relative;display:block;margin:0 auto}
 canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 22px rgba(0,0,0,.85))}
 .info{display:flex;flex-direction:column;align-items:center;margin-top:1px}
 .deg{font-size:1.9rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 14px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
 .dir{font-size:.95rem;letter-spacing:3px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:2px 16px;border-radius:30px;border:1px solid #c9a86a80;margin-top:2px}
-.el{font-size:.72rem;letter-spacing:1px;color:#c8bea8;margin-top:1px;text-align:center;line-height:1.3}
+.el{font-size:.7rem;letter-spacing:1px;color:#c8bea8;margin-top:1px;text-align:center;line-height:1.3}
 
-/* 卦象层 */
-.gua{
-  margin-top:3px;
-  border-radius:10px;
-  background:linear-gradient(180deg,rgba(201,168,106,.12),rgba(201,168,106,.04));
-  border:1px solid rgba(201,168,106,.35);
+/* 卦象小标签（常显，点击展开） */
+.guaTag{
+  margin-top:5px;
+  padding:5px 16px;
+  border-radius:30px;
+  background:linear-gradient(180deg,rgba(201,168,106,.16),rgba(201,168,106,.05));
+  border:1px solid rgba(201,168,106,.45);
+  color:#f0d78c;
+  font-size:.8rem;
+  font-weight:600;
+  letter-spacing:1px;
+  cursor:pointer;
   text-align:center;
-  max-width:96vw;
-  padding:5px 10px 6px;
+  max-width:94vw;
+  box-shadow:0 6px 16px -6px #000;
+  transition:all .15s;
 }
-.guaName{
-  font-size:.88rem;font-weight:700;color:#f0d78c;
-  letter-spacing:2px;text-shadow:0 2px 6px #000;
+.guaTag:active{transform:scale(.97)}
+.guaTag .sub{
+  color:#a89e8a;font-size:.65rem;font-weight:400;letter-spacing:.5px;margin-left:6px;
 }
-.guaCiphr{
-  font-size:.7rem;color:#e6d28a;margin-top:1px;
-  letter-spacing:.5px;font-weight:600;
-}
-.guaExpl{
-  margin-top:2px;
-  padding:2px 0 2px;
-  border-top:1px dashed rgba(201,168,106,.25);
-  display:flex;flex-direction:column;gap:0;
-  text-align:left;
-}
-.expl{
-  font-size:.62rem;color:#c8bea8;line-height:1.25;
-  display:flex;gap:4px;
-}
-.explNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:14px}
-.explText{flex:1}
-.guaText{
-  font-size:.65rem;color:#b8ac92;margin-top:2px;
-  padding-top:2px;
-  border-top:1px dashed rgba(201,168,106,.25);
-  letter-spacing:.3px;font-style:italic;
-}
-.guaBody{
-  margin-top:2px;
-  padding-top:2px;
-  border-top:1px dashed rgba(201,168,106,.25);
-  display:flex;flex-direction:column;gap:0;
-  text-align:left;
-}
-.yao{
-  font-size:.63rem;color:#e6dcc4;letter-spacing:.2px;line-height:1.25;
-  display:flex;gap:5px;
-}
-.yaoNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:28px}
-.yaoText{flex:1}
-.yaoTip{font-size:.55rem;color:#8a7f68;text-align:center;margin-top:2px;letter-spacing:1px}
 
-.st{text-align:center;color:#8a8f9b;font-size:.6rem;margin-top:2px;height:8px}
-.btn{margin-top:4px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:.85rem;padding:9px 22px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 20px -6px #000;transition:all .15s;cursor:pointer}
+/* 底部按钮 */
+.btn{margin-top:6px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:.85rem;padding:9px 22px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 20px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .hd{display:none!important}
+
+/* 展开面板（从底部升起） */
+.panelMask{
+  position:fixed;left:0;right:0;top:0;bottom:0;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;
+  transition:opacity .25s;
+  z-index:100;
+}
+.panelMask.show{opacity:1;pointer-events:auto}
+.panel{
+  position:fixed;left:0;right:0;bottom:0;
+  max-height:80vh;
+  background:linear-gradient(180deg,#1a150a,#0d0a06);
+  border-top:1px solid #c9a86a60;
+  border-radius:22px 22px 0 0;
+  box-shadow:0 -20px 40px -10px #000;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.2,.7,.3,1);
+  z-index:101;
+  display:flex;flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.panel.show{transform:translateY(0)}
+.panelHandle{
+  width:40px;height:4px;background:#8a7a5a;border-radius:2px;
+  margin:8px auto 4px;flex-shrink:0;
+}
+.panelHead{
+  padding:4px 18px 8px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid rgba(201,168,106,.18);
+  flex-shrink:0;
+}
+.panelTitle{
+  color:#f0d78c;font-size:1.05rem;font-weight:700;letter-spacing:2px;
+}
+.panelClose{
+  color:#a89e8a;font-size:1.2rem;background:transparent;border:none;
+  cursor:pointer;padding:4px 8px;line-height:1;
+}
+.panelBody{
+  overflow-y:auto;
+  padding:10px 18px 20px;
+  color:#d8cbb0;
+  font-size:.8rem;
+  line-height:1.5;
+  -webkit-overflow-scrolling:touch;
+}
+.section{margin-bottom:10px}
+.sectionTitle{
+  color:#c9a86a;font-size:.72rem;letter-spacing:3px;font-weight:600;
+  margin-bottom:4px;padding-bottom:2px;
+  border-bottom:1px dashed rgba(201,168,106,.25);
+}
+.ciphr{
+  font-size:.85rem;color:#f0e2b8;font-weight:600;letter-spacing:.5px;
+  line-height:1.5;
+}
+.expl{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.explRow{display:flex;gap:8px;font-size:.78rem;line-height:1.4}
+.explNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:20px}
+.explText{color:#c8bea8;flex:1}
+.xiang{
+  font-style:italic;color:#b8ac92;font-size:.78rem;
+  padding:6px 10px;border-left:2px solid #c9a86a80;
+  background:rgba(201,168,106,.05);border-radius:0 6px 6px 0;
+}
+.yaoRow{
+  display:flex;gap:8px;font-size:.78rem;line-height:1.45;
+  padding:3px 0;border-bottom:1px dotted rgba(201,168,106,.1);
+}
+.yaoRow:last-child{border-bottom:none}
+.yaoNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:32px}
+.yaoText{color:#e6dcc4;flex:1}
+.tip{text-align:center;color:#8a7f68;font-size:.62rem;letter-spacing:1px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -92,16 +139,22 @@ canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 22px rgba(0,0,0
     <div class="dir" id="dir">坎 · 北</div>
     <div class="el" id="el">子山 · 鼠 · 水（玄武）</div>
   </div>
-  <div class="gua">
-    <div class="guaName" id="guaName">坎为水</div>
-    <div class="guaCiphr" id="guaCiphr"></div>
-    <div class="guaExpl" id="guaExpl"></div>
-    <div class="guaText" id="guaText"></div>
-    <div class="guaBody" id="guaBody"></div>
-    <div class="yaoTip">卦辞 · 象传 · 六爻（由下往上）</div>
+  <div class="guaTag" id="guaTag">
+    <span id="guaTagName">坎为水</span>
+    <span class="sub" id="guaTagSub">· 水洊至</span>
   </div>
-  <div class="st" id="st">正在等待传感器数据…</div>
   <div><button class="btn" id="btn">🧭 点击启用指南针</button></div>
+</div>
+
+<!-- 展开面板 -->
+<div class="panelMask" id="panelMask"></div>
+<div class="panel" id="panel">
+  <div class="panelHandle"></div>
+  <div class="panelHead">
+    <div class="panelTitle" id="panelTitle">坎为水</div>
+    <button class="panelClose" id="panelClose">✕</button>
+  </div>
+  <div class="panelBody" id="panelBody"></div>
 </div>
 
 <script>
@@ -110,9 +163,11 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 var cvWrap=document.getElementById('cvWrap');
 var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
     elEl=document.getElementById('el'),stEl=document.getElementById('st'),btn=document.getElementById('btn');
-var guaNameEl=document.getElementById('guaName'),guaCiphrEl=document.getElementById('guaCiphr'),
-    guaExplEl=document.getElementById('guaExpl'),guaTextEl=document.getElementById('guaText'),
-    guaBodyEl=document.getElementById('guaBody');
+var guaTag=document.getElementById('guaTag'),guaTagName=document.getElementById('guaTagName'),
+    guaTagSub=document.getElementById('guaTagSub');
+var panelMask=document.getElementById('panelMask'),panel=document.getElementById('panel'),
+    panelTitle=document.getElementById('panelTitle'),panelBody=document.getElementById('panelBody'),
+    panelClose=document.getElementById('panelClose');
 
 var heading=0,fHeading=0,active=false,listening=false,last=0,F=0.18;
 var DPR=Math.min(window.devicePixelRatio||2,3);
@@ -124,15 +179,11 @@ var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
 
-// 八纯卦：卦名、卦辞原文、卦辞释义、象传、六爻
 var BAGUA=[
   {s:'☵', name:'坎', angle:0,   dir:'北',
    gua:'坎为水',
    ciphr:'坎：习坎，有孚，维心亨，行有尚。',
-   expl:[['习坎','重险'],
-         ['有孚','心怀诚信'],
-         ['维心亨','内心通达'],
-         ['行有尚','行动可嘉尚']],
+   expl:[['习坎','重险'],['有孚','心怀诚信'],['维心亨','内心通达'],['行有尚','行动可嘉尚']],
    text:'水洊至，习坎；君子以常德行',
    yao:[['初六','习坎，入于坎窞，凶'],
         ['九二','坎有险，求小得'],
@@ -144,10 +195,7 @@ var BAGUA=[
   {s:'☶', name:'艮', angle:45,  dir:'东北',
    gua:'艮为山',
    ciphr:'艮：艮其背，不获其身；行其庭，不见其人，无咎。',
-   expl:[['艮其背','止于所不见'],
-         ['不获其身','忘我'],
-         ['行其庭','行于庭中'],
-         ['不见其人','不见外物']],
+   expl:[['艮其背','止于所不见'],['不获其身','忘我'],['行其庭','行于庭中'],['不见其人','不见外物']],
    text:'兼山，艮；君子以思不出其位',
    yao:[['初六','艮其趾，无咎，利永贞'],
         ['六二','艮其腓，不拯其随，其心不快'],
@@ -159,10 +207,7 @@ var BAGUA=[
   {s:'☳', name:'震', angle:90,  dir:'东',
    gua:'震为雷',
    ciphr:'震：亨。震来虩虩，笑言哑哑；震惊百里，不丧匕鬯。',
-   expl:[['亨','通达'],
-         ['虩虩','恐惧貌'],
-         ['哑哑','笑语声'],
-         ['匕鬯','祭器与香酒']],
+   expl:[['亨','通达'],['虩虩','恐惧貌'],['哑哑','笑语声'],['匕鬯','祭器与香酒']],
    text:'洊雷，震；君子以恐惧修省',
    yao:[['初九','震来虩虩，后笑言哑哑，吉'],
         ['六二','震来厉，亿丧贝，跻于九陵，勿逐，七日得'],
@@ -174,12 +219,10 @@ var BAGUA=[
   {s:'☴', name:'巽', angle:135, dir:'东南',
    gua:'巽为风',
    ciphr:'巽：小亨，利有攸往，利见大人。',
-   expl:[['小亨','小有通达'],
-         ['利有攸往','宜有所往'],
-         ['利见大人','宜见大人']],
+   expl:[['小亨','小有通达'],['利有攸往','宜有所往'],['利见大人','宜见大人']],
    text:'随风，巽；君子以申命行事',
    yao:[['初六','进退，利武人之贞'],
-        ['九二ao','巽在床下，用史巫纷若，吉无咎'],
+        ['九二','巽在床下，用史巫纷若，吉无咎'],
         ['九三','频巽，吝'],
         ['六四','悔亡，田获三品'],
         ['九五','贞吉悔亡，无不利。无初有终，先庚三日，后庚三日，吉'],
@@ -188,9 +231,7 @@ var BAGUA=[
   {s:'☲', name:'离', angle:180, dir:'南',
    gua:'离为火',
    ciphr:'离：利贞，亨。畜牝牛，吉。',
-   expl:[['利贞','利于守正'],
-         ['亨','通达'],
-         ['畜牝牛','养母牛（喻柔顺）']],
+   expl:[['利贞','利于守正'],['亨','通达'],['畜牝牛','养母牛（喻柔顺）']],
    text:'明两作，离；大人以继明照于四方',
    yao:[['初九','履错然，敬之无咎'],
         ['六二','黄离，元吉'],
@@ -202,10 +243,7 @@ var BAGUA=[
   {s:'☷', name:'坤', angle:225, dir:'西南',
    gua:'坤为地',
    ciphr:'坤：元亨，利牝马之贞。君子有攸往，先迷后得主，利。',
-   expl:[['元亨','大通'],
-         ['牝马之贞','母马般的柔顺守正'],
-         ['先迷后得','先迷失后得主'],
-         ['利','有利']],
+   expl:[['元亨','大通'],['牝马之贞','母马般的柔顺守正'],['先迷后得','先迷失后得主'],['利','有利']],
    text:'地势坤，君子以厚德载物',
    yao:[['初六','履霜，坚冰至'],
         ['六二','直方大，不习无不利'],
@@ -217,10 +255,9 @@ var BAGUA=[
   {s:'☱', name:'兑', angle:270, dir:'西',
    gua:'兑为泽',
    ciphr:'兑：亨，利贞。',
-   expl:[['亨','通达'],
-         ['利贞','利于守正']],
+   expl:[['亨','通达'],['利贞','利于守正']],
    text:'丽泽，兑；君子以朋友讲习',
-   y:[['初九','和兑，吉'],
+   yao:[['初九','和兑，吉'],
         ['九二','孚兑，吉，悔亡'],
         ['六三','来兑，凶'],
         ['九四','商兑未宁，介疾有喜'],
@@ -230,10 +267,7 @@ var BAGUA=[
   {s:'☰', name:'乾', angle:315, dir:'西北',
    gua:'乾为天',
    ciphr:'乾：元，亨，利，贞。',
-   expl:[['元','元始、开端'],
-         ['亨','通达'],
-         ['利','和合相宜'],
-         ['贞','守正固持']],
+   expl:[['元','元始、开端'],['亨','通达'],['利','和合相宜'],['贞','守正固持']],
    text:'天行健，君子以自强不息',
    yao:[['初九','潜龙勿用'],
         ['九二','见龙在田，利见大人'],
@@ -276,10 +310,10 @@ function getInfo(d){
 
 function resizeCanvas(){
   var maxW = window.innerWidth - 2;
-  var reservedH = 480; // 卦辞 + 释义 + 象传 + 六爻，预留更多
+  var reservedH = 220; // 只给标题、角度、标签、按钮留最小空间
   var maxH = window.innerHeight - reservedH;
   var size = Math.min(maxW, maxH);
-  if(size < 140) size = 140;
+  if(size < 200) size = 200;
   W = size; H = size;
   cv.width = W * DPR; cv.height = H * DPR;
   cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -417,31 +451,65 @@ function draw(h){
   ctx.restore();
 }
 
+// 缓存
 var lastPalaceIdx = -1;
 
-function renderGua(palaceIdx){
-  if(palaceIdx === lastPalaceIdx) return;
-  lastPalaceIdx = palaceIdx;
+// 更新小标签
+function renderTag(palaceIdx){
   var p = BAGUA[palaceIdx];
+  guaTagName.textContent = p.gua;
+  // 提取象传第一句（逗号前），作为副标题
+  var firstPhrase = p.text.split(/[，。；]/)[0];
+  guaTagSub.textContent = '· ' + firstPhrase;
+}
 
-  guaNameEl.textContent = p.gua;
-  guaCiphrEl.textContent = p.ciphr;
+// 渲染面板内容
+function renderPanel(palaceIdx){
+  var p = BAGUA[palaceIdx];
+  panelTitle.textContent = p.gua;
 
-  var explHtml = '';
+  var html = '';
+
+  // 卦辞
+  html += '<div class="section">';
+  html += '<div class="sectionTitle">卦 辞</div>';
+  html += '<div class="ciphr">' + p.ciphr + '</div>';
+  // 释义
+  html += '<div class="expl">';
   for(var i=0;i<p.expl.length;i++){
-    explHtml += '<div class="expl"><span class="explNo">' + p.expl[i][0] + '</span>' +
-                '<span class="explText">' + p.expl[i][1] + '</span></div>';
+    html += '<div class="explRow"><span class="explNo">' + p.expl[i][0] + '</span>' +
+            '<span class="explText">' + p.expl[i][1] + '</span></div>';
   }
-  guaExplEl.innerHTML = explHtml;
+  html += '</div>';
+  html += '</div>';
 
-  guaTextEl.textContent = p.text;
+  // 象传
+  html += '<div class="section">';
+  html += '<div class="sectionTitle">象 传</div>';
+  html += '<div class="xiang">' + p.text + '</div>';
+  html += '</div>';
 
-  var yaoHtml = '';
+  // 六爻
+  html += '<div class="section">';
+  html += '<div class="sectionTitle">六 爻（由下往上）</div>';
   for(var j=0;j<p.yao.length;j++){
-    yaoHtml += '<div class="yao"><span class="yaoNo">' + p.yao[j][0] + '</span>' +
-               '<span class="yaoText">' + p.yao[j][1] + '</span></div>';
+    html += '<div class="yaoRow"><span class="yaoNo">' + p.yao[j][0] + '</span>' +
+            '<span class="yaoText">' + p.yao[j][1] + '</span></div>';
   }
-  guaBodyEl.innerHTML = yaoHtml;
+  html += '</div>';
+
+  html += '<div class="tip">— 点击卦名可收起 —</div>';
+
+  panelBody.innerHTML = html;
+}
+
+function openPanel(){
+  panel.classList.add('show');
+  panelMask.classList.add('show');
+}
+function closePanel(){
+  panel.classList.remove('show');
+  panelMask.classList.remove('show');
 }
 
 function update(d){
@@ -450,16 +518,31 @@ function update(d){
   degEl.textContent = Math.round(n)+'°';
   dirEl.textContent = info.palace.name + ' · ' + info.palace.dir;
   elEl.textContent  = info.shan + '山 · ' + info.sx + ' · ' + info.wx + '（' + info.beast + '）';
-  renderGua(info.palaceIdx);
+
+  // 如果切换到了新的宫，更新标签和面板
+  if(info.palaceIdx !== lastPalaceIdx){
+    lastPalaceIdx = info.palaceIdx;
+    renderTag(info.palaceIdx);
+    renderPanel(info.palaceIdx);
+  }
+
   draw(n);
 }
+
+// 事件绑定
+guaTag.addEventListener('click', function(){
+  if(panel.classList.contains('show')) closePanel();
+  else openPanel();
+});
+panelMask.addEventListener('click', closePanel);
+panelClose.addEventListener('click', closePanel);
 
 function onOri(e){
   var hh=null;
   if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){hh=e.webkitCompassHeading;}
   else if(e.alpha!==undefined&&e.alpha!==null){hh=(360-e.alpha)%360;}
   if(hh===null||isNaN(hh)){stEl.textContent='⚠️ 无法读取方向数据';return;}
-  if(!active){fHeading=hh;active=true;stEl.textContent='✅ 罗盘已激活';}
+  if(!active){fHeading=hh;active=true;}
   else{var diff=hh-fHeading;if(diff>180)diff-=360;if(diff<-180)diff+=360;fHeading=(fHeading+F*diff+360)%360;}
   update(fHeading);last=Date.now();
 }
@@ -468,37 +551,27 @@ function start(){
   if(listening)return;
   if(window.DeviceOrientationEvent){
     window.addEventListener('deviceorientation',onOri,true);
-    listening=true;stEl.textContent='📡 正在接收方向数据…';
+    listening=true;
   }else{
-    stEl.textContent='❌ 浏览器不支持方向传感器';
-    btn.classList.add('hd');update(0);return;
+    btn.textContent='不支持传感器';
+    btn.disabled=true;btn.style.opacity='.6';
+    update(0);return;
   }
-  setTimeout(function(){if(last===0)stEl.textContent='⏳ 等待传感器数据…';},3000);
 }
 
 function ask(){
   if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission().then(function(s){
       if(s==='granted'){start();btn.classList.add('hd');}
-      else{stEl.textContent='❌ 权限被拒绝';btn.textContent='重新请求权限';}
-    }).catch(function(){stEl.textContent='⚠️ 请求权限失败';});
+      else{btn.textContent='重新请求权限';}
+    }).catch(function(){});
   }else{start();btn.classList.add('hd');}
 }
 
 function init(){
   resizeCanvas();
   update(0);
-  stEl.textContent='点击按钮启用方向传感器';
   if(!window.DeviceOrientationEvent){
-    stEl.textContent='⚠️ 当前环境不支持方向传感器';
-    btn.textContent='不支持传感器';btn.disabled=true;btn.style.opacity='.6';
-  }else{btn.addEventListener('click',ask);}
-  window.addEventListener('resize',function(){resizeCanvas();update(fHeading);});
-  window.addEventListener('orientationchange',function(){setTimeout(function(){resizeCanvas();update(fHeading);},300);});
-}
-window.addEventListener('load',init);
-document.addEventListener('visibilitychange',function(){if(!document.hidden&&listening)update(fHeading);});
-})();
-</script>
-</body>
-</html>
+    btn.textContent='不支持传感器';
+    btn.disabled=true;btn.style.opacity='.6';
+  }else{btn.addEventListener('click',
