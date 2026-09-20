@@ -6,19 +6,19 @@
 <title>风水罗盘 · 指南针</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:radial-gradient(circle at 30% 20%,#1a1f2e,#0b0d14);min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;padding:12px;touch-action:none}
-.box{background:rgba(20,25,35,.85);backdrop-filter:blur(8px);border-radius:48px;padding:20px 18px 28px;box-shadow:0 30px 45px -15px #000,inset 0 1px 3px rgba(255,215,140,.15);border:1px solid rgba(255,215,140,.3);max-width:640px;width:100%}
-.title{text-align:center;color:#d9c9a8;font-weight:400;letter-spacing:8px;font-size:.85rem;margin-bottom:6px;opacity:.9}
-.cv{position:relative;display:flex;justify-content:center;align-items:center;aspect-ratio:1/1;width:100%;max-width:500px;margin:0 auto}
-canvas{width:100%!important;height:100%!important;display:block;border-radius:50%;filter:drop-shadow(0 18px 30px rgba(0,0,0,.9))}
-.info{display:flex;flex-direction:column;align-items:center;margin-top:12px}
-.deg{font-size:3rem;font-weight:600;color:#f3e6d0;text-shadow:0 4px 12px #00000080,0 0 20px #f0d09040;font-variant-numeric:tabular-nums;line-height:1}
-.dir{font-size:1.25rem;letter-spacing:3px;color:#d4c5a6;background:rgba(0,0,0,.45);padding:5px 22px;border-radius:40px;border:1px solid #ffd98c30;margin-top:4px}
-.el{font-size:.85rem;letter-spacing:4px;color:#a89e8a;margin-top:4px;background:rgba(30,25,20,.5);padding:4px 18px;border-radius:30px;border:1px solid #c9b07a30}
-.st{text-align:center;color:#7a7f8b;font-size:.72rem;margin-top:10px;height:16px}
-.btn{margin-top:14px;background:#2e2f3a;border:none;border-radius:60px;color:#e6dbc9;font-size:.9rem;padding:12px 28px;font-weight:500;letter-spacing:.8px;box-shadow:0 10px 18px -6px #00000080,inset 0 1px 1px #ffffff20;transition:all .15s;cursor:pointer;border:1px solid #ffd98c40;display:inline-block}
-.btn:hover{background:#3d3f4d;color:#fff;border-color:#ffd98c90}
-.btn:active{background:#1e1f28;transform:scale(.98)}
+body{background:#0a0a0a;min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:'PingFang SC','Microsoft YaHei',sans-serif;padding:10px;touch-action:none}
+.box{background:#0f0f0f;border-radius:32px;padding:16px 14px 24px;box-shadow:0 20px 50px -10px #000,inset 0 0 0 1px #3a2f1a;max-width:660px;width:100%}
+.title{text-align:center;color:#c9a86a;font-weight:400;letter-spacing:8px;font-size:.8rem;margin-bottom:6px}
+.cv{position:relative;display:flex;justify-content:center;align-items:center;aspect-ratio:1/1;width:100%;max-width:520px;margin:0 auto}
+canvas{width:100%!important;height:100%!important;display:block;border-radius:50%;filter:drop-shadow(0 16px 28px rgba(0,0,0,.9))}
+.info{display:flex;flex-direction:column;align-items:center;margin-top:10px}
+.deg{font-size:2.6rem;font-weight:600;color:#f3e6d0;text-shadow:0 3px 10px #00000080;font-variant-numeric:tabular-nums;line-height:1}
+.dir{font-size:1.15rem;letter-spacing:3px;color:#e6c27a;background:rgba(0,0,0,.5);padding:4px 20px;border-radius:30px;border:1px solid #c9a86a50;margin-top:4px}
+.el{font-size:.8rem;letter-spacing:3px;color:#a89e8a;margin-top:4px}
+.st{text-align:center;color:#7a7f8b;font-size:.7rem;margin-top:8px;height:14px}
+.btn{margin-top:12px;background:#2a2318;border:1px solid #c9a86a60;border-radius:60px;color:#e6dbc9;font-size:.85rem;padding:11px 26px;font-weight:500;letter-spacing:.5px;box-shadow:0 8px 16px -6px #000;transition:all .15s;cursor:pointer}
+.btn:hover{background:#3a3020;color:#fff}
+.btn:active{transform:scale(.97)}
 .fc{display:flex;justify-content:center}
 .hd{display:none!important}
 </style>
@@ -26,10 +26,10 @@ canvas{width:100%!important;height:100%!important;display:block;border-radius:50
 <body>
 <div class="box">
 <div class="title">· 风 水 罗 盘 ·</div>
-<div class="cv"><canvas id="cv" width="760" height="760"></canvas></div>
+<div class="cv"><canvas id="cv" width="800" height="800"></canvas></div>
 <div class="info">
 <div class="deg" id="deg">0°</div>
-<div class="dir" id="dir">北</div>
+<div class="dir" id="dir">子 · 北</div>
 <div class="el" id="el">水 · 玄武</div>
 </div>
 <div class="st" id="st">正在等待传感器数据…</div>
@@ -43,147 +43,148 @@ var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
     elEl=document.getElementById('el'),stEl=document.getElementById('st'),btn=document.getElementById('btn');
 var heading=0,fHeading=0,active=false,listening=false,last=0,F=0.18;
 
-// ---- 二十四山 ----
+// 数据
 var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
-// ---- 六十四卦（简化：用符号近似）----
-var GUA=['䷀','䷁','䷂','䷃','䷄','䷅','䷆','䷇','䷈','䷉','䷊','䷋','䷌','䷍','䷎','䷏','䷐','䷑','䷒','䷓','䷔','䷕','䷖','䷗','䷘','䷙','䷚','䷛','䷜','䷝','䷞','䷟','䷠','䷡','䷢','䷣','䷤','䷥','䷦','䷧','䷨','䷩','䷪','䷫','䷬','䷭','䷮','䷯','䷰','䷱','䷲','䷳','䷴','䷵','䷶','䷷','䷸','䷹','䷺','䷻','䷼','䷽','䷾','䷿'];
-// ---- 天干 ----
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-// ---- 地支 ----
 var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+var GUA=['☰','☱','☲','☳','☴','☵','☶','☷']; // 八卦
+var XING=['角','亢','氐','房','心','尾','箕','斗','牛','女','虚','危','室','壁','奎','娄','胃','昴','毕','觜','参','井','鬼','柳','星','张','翼','轸']; // 二十八宿
 
 function getDir(d){d=((d%360)+360)%360;
-if(d>=337.5||d<22.5)return'北';if(d<67.5)return'东北';if(d<112.5)return'东';if(d<157.5)return'东南';
-if(d<202.5)return'南';if(d<247.5)return'西南';if(d<292.5)return'西';return'西北';}
+if(d>=337.5||d<22.5)return'子 · 北';if(d<67.5)return'艮 · 东北';if(d<112.5)return'卯 · 东';if(d<157.5)return'巽 · 东南';
+if(d<202.5)return'午 · 南';if(d<247.5)return'坤 · 西南';if(d<292.5)return'酉 · 西';return'乾 · 西北';}
 function getEl(d){d=((d%360)+360)%360;
 if(d>=337.5||d<22.5)return'水 · 玄武';if(d<67.5)return'土 · 螣蛇';if(d<112.5)return'木 · 青龙';if(d<157.5)return'木 · 青龙';
 if(d<202.5)return'火 · 朱雀';if(d<247.5)return'土 · 勾陈';if(d<292.5)return'金 · 白虎';return'金 · 白虎';}
 
-// 画圆环文字（沿圆周排列）
-function ringText(cx,cy,r,texts,font,color,startAng,reverse){
+// 画环文字
+function ringText(cx,cy,r,texts,font,color,startAng,radial){
     ctx.save();ctx.translate(cx,cy);
     ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillStyle=color;ctx.shadowColor='#000';ctx.shadowBlur=6;
+    ctx.fillStyle=color;ctx.shadowColor='#000';ctx.shadowBlur=4;
     var n=texts.length,step=360/n;
     for(var i=0;i<n;i++){
         var a=((startAng+i*step)*Math.PI)/180;
         ctx.save();
         ctx.rotate(a);
-        if(reverse)ctx.rotate(Math.PI);
+        if(radial)ctx.rotate(Math.PI/2);
         ctx.translate(0,-r);
-        if(reverse)ctx.rotate(Math.PI);
         ctx.fillText(texts[i],0,0);
         ctx.restore();
     }
     ctx.restore();
 }
 
+// 画太极
 function drawTaiji(cx,cy,r){
     ctx.save();ctx.translate(cx,cy);
-    ctx.beginPath();ctx.arc(0,0,r,-Math.PI/2,Math.PI/2);ctx.fillStyle='#f0e6d2';ctx.fill();
+    ctx.beginPath();ctx.arc(0,0,r,-Math.PI/2,Math.PI/2);ctx.fillStyle='#f5ecd8';ctx.fill();
     ctx.beginPath();ctx.arc(0,0,r,Math.PI/2,-Math.PI/2);ctx.fillStyle='#1a1a1a';ctx.fill();
     ctx.beginPath();ctx.arc(0,-r/2,r/2,0,Math.PI*2);ctx.fillStyle='#1a1a1a';ctx.fill();
-    ctx.beginPath();ctx.arc(0,r/2,r/2,0,Math.PI*2);ctx.fillStyle='#f0e6d2';ctx.fill();
-    ctx.beginPath();ctx.arc(0,-r/2,r/6,0,Math.PI*2);ctx.fillStyle='#f0e6d2';ctx.fill();
+    ctx.beginPath();ctx.arc(0,r/2,r/2,0,Math.PI*2);ctx.fillStyle='#f5ecd8';ctx.fill();
+    ctx.beginPath();ctx.arc(0,-r/2,r/6,0,Math.PI*2);ctx.fillStyle='#f5ecd8';ctx.fill();
     ctx.beginPath();ctx.arc(0,r/2,r/6,0,Math.PI*2);ctx.fillStyle='#1a1a1a';ctx.fill();
     ctx.restore();
 }
 
 function draw(h){
     var w=cv.width,h2=cv.height,cx=w/2,cy=h2/2;
-    var R=Math.min(w,h2)*0.42;
+    var R=Math.min(w,h2)*0.44;
     ctx.clearRect(0,0,w,h2);
 
-    // 底盘
-    var bg=ctx.createRadialGradient(cx,cy,R*.1,cx,cy,R*1.5);
-    bg.addColorStop(0,'#1b1e28');bg.addColorStop(.7,'#0f1119');bg.addColorStop(1,'#07090e');
-    ctx.beginPath();ctx.arc(cx,cy,R*1.03,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
-    ctx.strokeStyle='#5a4e3a30';ctx.lineWidth=2;ctx.stroke();
+    // 外圈深色底
+    ctx.beginPath();ctx.arc(cx,cy,R*1.02,0,Math.PI*2);
+    ctx.fillStyle='#1a150a';ctx.fill();
 
-    // 外框
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.strokeStyle='#b89e6c';ctx.lineWidth=6;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#e5d7b3';ctx.lineWidth=1.8;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R*.90,0,Math.PI*2);ctx.strokeStyle='#8f846b';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R*.84,0,Math.PI*2);ctx.strokeStyle='#8f846b';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R*.78,0,Math.PI*2);ctx.strokeStyle='#8f846b';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R*.72,0,Math.PI*2);ctx.strokeStyle='#8f846b';ctx.lineWidth=1;ctx.stroke();
+    // 主罗盘黄底
+    var bg=ctx.createRadialGradient(cx,cy,R*.2,cx,cy,R*1.02);
+    bg.addColorStop(0,'#f5e8c8');bg.addColorStop(.7,'#e8d5a0');bg.addColorStop(1,'#c9a86a');
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
+    ctx.strokeStyle='#8b6f3a';ctx.lineWidth=3;ctx.stroke();
 
-    // 第1层：六十四卦（外圈）
-    ringText(cx,cy,R*.94,GUA,R*.022+'px sans-serif','#c9b07a',0,false);
-    // 第2层：二十四山（顺时针从子开始，子=0°北）
-    ringText(cx,cy,R*.87,SHAN,R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#e6c27a',0,false);
-    // 第3层：天干地支（天干在前，地支在后，环绕一圈 22 个字符）
+    // 外框红黑线
+    ctx.beginPath();ctx.arc(cx,cy,R*.98,0,Math.PI*2);ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
+
+    // 1. 最外圈：六十四卦（小符号）
+    var gua64=['䷀','䷁','䷂','䷃','䷄','䷅','䷆','䷇','䷈','䷉','䷊','䷋','䷌','䷍','䷎','䷏','䷐','䷑','䷒','䷓','䷔','䷕','䷖','䷗','䷘','䷙','䷚','䷛','䷜','䷝','䷞','䷟','䷠','䷡','䷢','䷣','䷤','䷥','䷦','䷧','䷨','䷩','䷪','䷫','䷬','䷭','䷮','䷯','䷰','䷱','䷲','䷳','䷴','䷵','䷶','䷷','䷸','䷹','䷺','䷻','䷼','䷽','䷾','䷿'];
+    ringText(cx,cy,R*.925,gua64,R*.022+'px sans-serif','#3a2a10',0,false);
+
+    // 2. 二十八宿
+    ringText(cx,cy,R*.875,XING,R*.024+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
+
+    // 3. 二十四山（红字）
+    ringText(cx,cy,R*.815,SHAN,'bold '+R*.032+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+
+    // 4. 天干地支
     var gz=GAN.concat(ZHI);
-    ringText(cx,cy,R*.81,gz,R*.026+'px "PingFang SC","Microsoft YaHei",sans-serif','#b8a888',0,false);
+    ringText(cx,cy,R*.755,gz,R*.026+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
 
-    // 刻度线（在 R*.72 ~ R*.78 之间）
+    // 5. 八卦符号（大）
+    ringText(cx,cy,R*.68,GUA,R*.055+'px "Segoe UI Symbol",sans-serif','#1a1a1a',0,false);
+
+    // 6. 内圈刻度
     ctx.save();ctx.translate(cx,cy);
     for(var i=0;i<360;i+=5){
         var rad=i*Math.PI/180;
         var isMajor=i%30===0, isCard=i%90===0;
-        var outX=Math.sin(rad)*R*.78, outY=-Math.cos(rad)*R*.78;
-        var inR=isMajor?R*.72:R*.75;
-        var inX=Math.sin(rad)*inR, inY=-Math.cos(rad)*inR;
-        ctx.beginPath();ctx.moveTo(outX,outY);ctx.lineTo(inX,inY);
-        ctx.strokeStyle=isCard?'#e6c27a':(isMajor?'#c8b58a':'#b8a88860');
-        ctx.lineWidth=isCard?3:(isMajor?2:1);
+        var outR=R*.62, inR=isMajor?(isCard?R*.55:R*.57):R*.59;
+        ctx.beginPath();
+        ctx.moveTo(Math.sin(rad)*outR,-Math.cos(rad)*outR);
+        ctx.lineTo(Math.sin(rad)*inR,-Math.cos(rad)*inR);
+        ctx.strokeStyle=isCard?'#8b1a1a':(isMajor?'#1a1a1a':'#5a4a30');
+        ctx.lineWidth=isCard?2.5:(isMajor?1.8:1);
         ctx.stroke();
     }
     ctx.restore();
 
-    // 内圈方位标签（北东南西）
+    // 中心区（白底）
+    ctx.beginPath();ctx.arc(cx,cy,R*.50,0,Math.PI*2);
+    ctx.fillStyle='#f5ecd8';ctx.fill();
+    ctx.strokeStyle='#8b6f3a';ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,R*.48,0,Math.PI*2);
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
+
+    // 内圈小字（十二地支，红黑交替）
+    var zhi12=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    ringText(cx,cy,R*.44,zhi12,'bold '+R*.045+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+
+    // 最中心太极
+    drawTaiji(cx,cy,R*.32);
+
+    // 中心十字红线
     ctx.save();ctx.translate(cx,cy);
-    ctx.font='bold '+(R*.09)+'px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    var dirs=[['北',0,'#ffd966'],['东',90,'#dfd3b8'],['南',180,'#dfd3b8'],['西',270,'#dfd3b8']];
-    dirs.forEach(function(d){
-        var a=d[1]*Math.PI/180;
-        ctx.fillStyle=d[2];ctx.shadowColor='#000';ctx.shadowBlur=8;
-        ctx.fillText(d[0],Math.sin(a)*R*.66,-Math.cos(a)*R*.66);
-    });
+    ctx.beginPath();ctx.moveTo(-R*.32,0);ctx.lineTo(R*.32,0);
+    ctx.moveTo(0,-R*.32);ctx.lineTo(0,R*.32);
+    ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
     ctx.restore();
 
-    // 八卦环（R*.60 位置，后天八卦方位）
-    var bagua=[{s:'☵',a:0},{s:'☶',a:45},{s:'☳',a:90},{s:'☴',a:135},{s:'☲',a:180},{s:'☷',a:225},{s:'☱',a:270},{s:'☰',a:315}];
-    ctx.save();ctx.translate(cx,cy);
-    ctx.font=(R*.13)+'px "Segoe UI Symbol","Apple Symbols",sans-serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    bagua.forEach(function(b){
-        var a=b.a*Math.PI/180;
-        ctx.fillStyle='#c9b07a';ctx.shadowColor='#000';ctx.shadowBlur=8;
-        ctx.fillText(b.s,Math.sin(a)*R*.60,-Math.cos(a)*R*.60);
-    });
-    ctx.restore();
-
-    // 指针（指向北，-heading 旋转）
+    // 指针（磁针）：红北白南，指向 -heading 方向
     ctx.save();ctx.translate(cx,cy);
     ctx.rotate((-h*Math.PI)/180);
-    var pl=R*.55,pw=R*.11;
-    // 红北
-    ctx.beginPath();ctx.moveTo(0,-pl);ctx.lineTo(pw*.9,0);ctx.lineTo(0,pw*.55);ctx.lineTo(-pw*.9,0);ctx.closePath();
-    var rg=ctx.createLinearGradient(0,-pl,0,0);rg.addColorStop(0,'#ff4d4d');rg.addColorStop(1,'#b30000');
-    ctx.fillStyle=rg;ctx.shadowColor='#ff0000a0';ctx.shadowBlur=15;ctx.fill();
-    // 白南
-    ctx.beginPath();ctx.moveTo(0,pl);ctx.lineTo(pw*.9,0);ctx.lineTo(0,-pw*.55);ctx.lineTo(-pw*.9,0);ctx.closePath();
-    var wg=ctx.createLinearGradient(0,pl,0,0);wg.addColorStop(0,'#e0e0e0');wg.addColorStop(1,'#909090');
-    ctx.fillStyle=wg;ctx.shadowColor='#ffffff60';ctx.shadowBlur=12;ctx.fill();
+    var pl=R*.40,pw=R*.035;
+    // 红端（北）
+    ctx.beginPath();
+    ctx.moveTo(0,-pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,pw);ctx.lineTo(-pw*3,0);ctx.closePath();
+    ctx.fillStyle='#c81e1e';ctx.shadowColor='#ff000080';ctx.shadowBlur=10;ctx.fill();
+    // 白端（南）
+    ctx.beginPath();
+    ctx.moveTo(0,pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,-pw);ctx.lineTo(-pw*3,0);ctx.closePath();
+    ctx.fillStyle='#f5f5f5';ctx.shadowColor='#ffffff60';ctx.shadowBlur=8;ctx.fill();
+    // 中心轴
+    ctx.beginPath();ctx.arc(0,0,R*.022,0,Math.PI*2);
+    ctx.fillStyle='#c9a86a';ctx.shadowBlur=8;ctx.fill();
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5;ctx.stroke();
     ctx.restore();
 
-    // 太极图
-    drawTaiji(cx,cy,R*.50);
-
-    // 中心金点
+    // 红色十字线（贯穿罗盘，装饰）
     ctx.save();ctx.translate(cx,cy);
-    ctx.beginPath();ctx.arc(0,0,R*.055,0,Math.PI*2);ctx.fillStyle='#c9b07a';
-    ctx.shadowColor='#ffd96680';ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
-    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2;ctx.stroke();
-    ctx.restore();
-
-    // 底部小字
-    ctx.save();
-    ctx.font=(R*.05)+'px "PingFang SC","Microsoft YaHei",sans-serif';
-    ctx.fillStyle='#b8a88870';ctx.textAlign='center';
-    ctx.fillText('六十四卦 · 二十四山 · 天干地支',cx,cy+R*.93);
+    ctx.beginPath();
+    ctx.moveTo(-R*.98,0);ctx.lineTo(-R*.52,0);
+    ctx.moveTo(R*.52,0);ctx.lineTo(R*.98,0);
+    ctx.moveTo(0,-R*.98);ctx.lineTo(0,-R*.52);
+    ctx.moveTo(0,R*.52);ctx.lineTo(0,R*.98);
+    ctx.strokeStyle='#8b1a1a70';ctx.lineWidth=1;ctx.stroke();
     ctx.restore();
 }
 
@@ -200,7 +201,7 @@ function onOri(e){
     if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){hh=e.webkitCompassHeading;}
     else if(e.alpha!==undefined&&e.alpha!==null){hh=(360-e.alpha)%360;}
     if(hh===null||isNaN(hh)){stEl.textContent='⚠️ 无法读取方向数据';return;}
-    if(!active){fHeading=hh;active=true;stEl.textContent='✅ 罗盘已激活 · 太极护佑';}
+    if(!active){fHeading=hh;active=true;stEl.textContent='✅ 罗盘已激活';}
     else{var diff=hh-fHeading;if(diff>180)diff-=360;if(diff<-180)diff+=360;fHeading=(fHeading+F*diff+360)%360;}
     update(fHeading);last=Date.now();
 }
@@ -227,7 +228,7 @@ function ask(){
 }
 
 function init(){
-    draw(0);degEl.textContent='0°';dirEl.textContent='北';elEl.textContent='水 · 玄武';
+    draw(0);degEl.textContent='0°';dirEl.textContent='子 · 北';elEl.textContent='水 · 玄武';
     stEl.textContent='点击按钮启用方向传感器';
     if(!window.DeviceOrientationEvent){
         stEl.textContent='⚠️ 当前环境不支持方向传感器';
