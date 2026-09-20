@@ -24,6 +24,33 @@ canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0
 .deg{font-size:3rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 16px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
 .dir{font-size:1.35rem;letter-spacing:4px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:5px 22px;border-radius:40px;border:1px solid #c9a86a80;margin-top:4px}
 .el{font-size:1rem;letter-spacing:2px;color:#c8bea8;margin-top:3px;text-align:center;line-height:1.4}
+
+/* 卦象提示层 */
+.gua{
+  margin-top:6px;
+  padding:6px 16px;
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(201,168,106,.12),rgba(201,168,106,.04));
+  border:1px solid rgba(201,168,106,.35);
+  text-align:center;
+  max-width:92vw;
+  line-height:1.35;
+}
+.guaName{
+  font-size:1rem;
+  font-weight:700;
+  color:#f0d78c;
+  letter-spacing:2px;
+  text-shadow:0 2px 8px #000;
+}
+.guaText{
+  font-size:.85rem;
+  color:#d8cbb0;
+  margin-top:2px;
+  letter-spacing:1px;
+  font-style:italic;
+}
+
 .st{text-align:center;color:#8a8f9b;font-size:.8rem;margin-top:4px;height:14px}
 .btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:1rem;padding:12px 30px;font-weight:600;letter-spacing:1px;box-shadow:0 12px 24px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
@@ -37,7 +64,11 @@ canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0
   <div class="info">
     <div class="deg" id="deg">0°</div>
     <div class="dir" id="dir">坎 · 北</div>
-    <div class="el" id="el">子山 · 鼠 · 水</div>
+    <div class="el" id="el">子山 · 鼠 · 水（玄武）</div>
+  </div>
+  <div class="gua" id="guaBox">
+    <div class="guaName" id="guaName">坎为水</div>
+    <div class="guaText" id="guaText">水洊至，习坎；君子以常德行</div>
   </div>
   <div class="st" id="st">正在等待传感器数据…</div>
   <div><button class="btn" id="btn">🧭 点击启用指南针</button></div>
@@ -49,114 +80,62 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 var cvWrap=document.getElementById('cvWrap');
 var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
     elEl=document.getElementById('el'),stEl=document.getElementById('st'),btn=document.getElementById('btn');
+var guaNameEl=document.getElementById('guaName'),guaTextEl=document.getElementById('guaText');
 
 var heading=0,fHeading=0,active=false,listening=false,last=0,F=0.18;
 var DPR=Math.min(window.devicePixelRatio||2,3);
 var W=800,H=800,R=0;
 
-/* ========== 数据 ========== */
-
-// 二十四山（从正北 子 开始，顺时针 24 个，每个 15°）
 var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙',
           '午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
-
-// 十二地支
 var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-
-// 天干
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-
-// 十二生肖（与十二地支对应）
 var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
-
-// 后天八卦（方位正确：0°=坎=北，45°=艮=东北，90°=震=东，135°=巽=东南，180°=离=南，225°=坤=西南，270°=兑=西，315°=乾=西北）
 var BAGUA=[
-  {s:'☵', name:'坎', angle:0,   dir:'北'},
-  {s:'☶', name:'艮', angle:45,  dir:'东北'},
-  {s:'☳', name:'震', angle:90,  dir:'东'},
-  {s:'☴', name:'巽', angle:135, dir:'东南'},
-  {s:'☲', name:'离', angle:180, dir:'南'},
-  {s:'☷', name:'坤', angle:225, dir:'西南'},
-  {s:'☱', name:'兑', angle:270, dir:'西'},
-  {s:'☰', name:'乾', angle:315, dir:'西北'}
+  {s:'☵', name:'坎', angle:0,   dir:'北',   gua:'坎为水', text:'水洊至，习坎；君子以常德行'},
+  {s:'☶', name:'艮', angle:45,  dir:'东北', gua:'艮为山', text:'兼山，艮；君子以思不出其位'},
+  {s:'☳', name:'震', angle:90,  dir:'东',   gua:'震为雷', text:'洊雷，震；君子以恐惧修省'},
+  {s:'☴', name:'巽', angle:135, dir:'东南', gua:'巽为风', text:'随风，巽；君子以申命行事'},
+  {s:'☲', name:'离', angle:180, dir:'南',   gua:'离为火', text:'明两作，离；大人以继明照于四方'},
+  {s:'☷', name:'坤', angle:225, dir:'西南', gua:'坤为地', text:'地势坤，君子以厚德载物'},
+  {s:'☱', name:'兑', angle:270, dir:'西',   gua:'兑为泽', text:'丽泽，兑；君子以朋友讲习'},
+  {s:'☰', name:'乾', angle:315, dir:'西北', gua:'乾为天', text:'天行健，君子以自强不息'}
 ];
 
-// 六十四卦：按后天八卦 8 宫分布，每宫 8 卦，共 64 卦，每卦 5.625°
-// 用通行本卦序中"该宫所属"的 8 卦，从该宫起始角度开始排。
-// 为简化，这里按"先天八卦顺序"分组；显示效果就是 8 宫各 8 卦绕一圈。
-// 每个宫从"宫头角度-22.5°"到"宫头角度+22.5°"占 8 卦，每卦 5.625°。
-// 使用 Unicode 六十四卦符号（按分宫排列）
 var GUA64_BY_PALACE = [
-  // 坎宫（北，0°）8 卦
   ['䷜','䷻','䷂','䷃','䷄','䷅','䷆','䷇'],
-  // 艮宫（东北，45°）8 卦
   ['䷳','䷙','䷚','䷛','䷠','䷡','䷒','䷓'],
-  // 震宫（东，90°）8 卦
   ['䷲','䷔','䷕','䷖','䷗','䷘','䷚','䷛'],
-  // 巽宫（东南，135°）8 卦
   ['䷸','䷈','䷉','䷊','䷋','䷌','䷍','䷎'],
-  // 离宫（南，180°）8 卦
   ['䷝','䷰','䷱','䷶','䷷','䷵','䷞','䷟'],
-  // 坤宫（西南，225°）8 卦
   ['䷁','䷗','䷒','䷊','䷓','䷋','䷭','䷮'],
-  // 兑宫（西，270°）8 卦
   ['䷹','䷪','䷫','䷬','䷭','䷮','䷯','䷰'],
-  // 乾宫（西北，315°）8 卦
   ['䷀','䷫','䷠','䷡','䷪','䷱','䷲','䷳']
 ];
 
-// 二十八宿（简化，保留 28 个名称，平均分布）
 var XING=['角','亢','氐','房','心','尾','箕','斗','牛','女','虚','危','室','壁',
           '奎','娄','胃','昴','毕','觜','参','井','鬼','柳','星','张','翼','轸'];
 
-/* ========== 方位对应 ========== */
-
-// 根据角度返回：宫（八卦）、二十四山、生肖、五行
 function getInfo(d){
   d=((d%360)+360)%360;
-  // 八卦宫（每 45° 一宫，中心对齐：0±22.5 为坎）
   var palaceIdx = Math.floor(((d+22.5)%360)/45);
   var palace = BAGUA[palaceIdx];
-
-  // 二十四山（每 15° 一山，中心对齐）
   var shanIdx = Math.floor(((d+7.5)%360)/15);
   var shan = SHAN[shanIdx];
-
-  // 生肖（每 30° 一生肖，中心对齐：0±15 为鼠）
   var sxIdx = Math.floor(((d+15)%360)/30);
   var sx = SHENGXIAO[sxIdx];
-
-  // 五行 + 神兽
   var wuxingArr = [
-    {wx:'水', sx:'玄武'},
-    {wx:'土', sx:'螣蛇'},
-    {wx:'木', sx:'青龙'},
-    {wx:'木', sx:'青龙'},
-    {wx:'土', sx:'勾陈'},
-    {wx:'火', sx:'朱雀'},
-    {wx:'火', sx:'朱雀'},
-    {wx:'土', sx:'勾陈'},
-    {wx:'金', sx:'白虎'},
-    {wx:'金', sx:'白虎'},
-    {wx:'土', sx:'螣蛇'},
-    {wx:'水', sx:'玄武'}
+    {wx:'水', sx:'玄武'},{wx:'土', sx:'螣蛇'},{wx:'木', sx:'青龙'},{wx:'木', sx:'青龙'},
+    {wx:'土', sx:'勾陈'},{wx:'火', sx:'朱雀'},{wx:'火', sx:'朱雀'},{wx:'土', sx:'勾陈'},
+    {wx:'金', sx:'白虎'},{wx:'金', sx:'白虎'},{wx:'土', sx:'螣蛇'},{wx:'水', sx:'玄武'}
   ];
   var w = wuxingArr[sxIdx];
-
-  return {
-    palace: palace,
-    shan: shan,
-    sx: sx,
-    wx: w.wx,
-    beast: w.sx
-  };
+  return {palace:palace, shan:shan, sx:sx, wx:w.wx, beast:w.sx};
 }
-
-/* ========== 画布 ========== */
 
 function resizeCanvas(){
   var maxW = window.innerWidth - 2;
-  var reservedH = 250;
+  var reservedH = 320;
   var maxH = window.innerHeight - reservedH;
   var size = Math.min(maxW, maxH);
   if(size < 200) size = 200;
@@ -185,14 +164,13 @@ function ringText(cx,cy,r,texts,font,color,startAng,radial){
   ctx.restore();
 }
 
-// 六十四卦按宫分布：每个宫从 (宫角度-22.5°) 开始，8 卦各占 5.625°
 function drawGua64(cx,cy,r,font,color){
   ctx.save();ctx.translate(cx,cy);
   ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillStyle=color;
   for(var p=0;p<8;p++){
-    var startAngle = BAGUA[p].angle - 22.5; // 该宫起始
-    var step = 45 / 8; // 5.625°
+    var startAngle = BAGUA[p].angle - 22.5;
+    var step = 45 / 8;
     for(var k=0;k<8;k++){
       var a = (startAngle + step*k + step/2) * Math.PI / 180;
       ctx.save();ctx.rotate(a);
@@ -204,7 +182,6 @@ function drawGua64(cx,cy,r,font,color){
   ctx.restore();
 }
 
-// 八卦符号按方位绘制
 function drawBagua(cx,cy,r,font,color){
   ctx.save();ctx.translate(cx,cy);
   ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
@@ -234,10 +211,8 @@ function draw(h){
   var cx=W/2, cy=H/2;
   ctx.clearRect(0,0,W,H);
 
-  // 外底
   ctx.beginPath();ctx.arc(cx,cy,R*1.02,0,Math.PI*2);ctx.fillStyle='#1a150a';ctx.fill();
 
-  // 黄底
   var bg=ctx.createRadialGradient(cx,cy,R*.2,cx,cy,R*1.02);
   bg.addColorStop(0,'#fdf3d8');bg.addColorStop(.7,'#eeda9e');bg.addColorStop(1,'#c9a86a');
   ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
@@ -246,25 +221,13 @@ function draw(h){
   ctx.beginPath();ctx.arc(cx,cy,R*.98,0,Math.PI*2);ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
   ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-  // ===== 环 1：六十四卦（按 8 宫分布）=====
   drawGua64(cx,cy,R*.92,R*.028+'px sans-serif','#3a2a10');
-
-  // ===== 环 2：二十八宿 =====
   ringText(cx,cy,R*.86,XING,R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
-
-  // ===== 环 3：二十四山 =====
   ringText(cx,cy,R*.80,SHAN,'bold '+R*.046+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
-
-  // ===== 环 4：十二生肖 =====
   ringText(cx,cy,R*.735,SHENGXIAO,'bold '+R*.050+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
-
-  // ===== 环 5：天干 + 地支 =====
   ringText(cx,cy,R*.675,GAN.concat(ZHI),R*.036+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
-
-  // ===== 环 6：八卦符号（按后天方位）=====
   drawBagua(cx,cy,R*.605,R*.080+'px "Segoe UI Symbol",sans-serif','#8b1a1a');
 
-  // ===== 刻度 =====
   ctx.save();ctx.translate(cx,cy);
   for(var i=0;i<360;i+=5){
     var rad=i*Math.PI/180;
@@ -279,25 +242,20 @@ function draw(h){
   }
   ctx.restore();
 
-  // 中心白底
   ctx.beginPath();ctx.arc(cx,cy,R*.44,0,Math.PI*2);ctx.fillStyle='#fbf3e0';ctx.fill();
   ctx.strokeStyle='#8b6f3a';ctx.lineWidth=2;ctx.stroke();
   ctx.beginPath();ctx.arc(cx,cy,R*.42,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-  // 内圈十二地支
   ringText(cx,cy,R*.375,ZHI,'bold '+R*.056+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
 
-  // 太极
   drawTaiji(cx,cy,R*.26);
 
-  // 十字线
   ctx.save();ctx.translate(cx,cy);
   ctx.beginPath();ctx.moveTo(-R*.26,0);ctx.lineTo(R*.26,0);
   ctx.moveTo(0,-R*.26);ctx.lineTo(0,R*.26);
   ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
   ctx.restore();
 
-  // 指针
   ctx.save();ctx.translate(cx,cy);ctx.rotate((-h*Math.PI)/180);
   var pl=R*.34,pw=R*.030;
   ctx.beginPath();ctx.moveTo(0,-pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,pw);ctx.lineTo(-pw*3,0);ctx.closePath();
@@ -308,7 +266,6 @@ function draw(h){
   ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5;ctx.stroke();
   ctx.restore();
 
-  // 外圈红十字
   ctx.save();ctx.translate(cx,cy);
   ctx.beginPath();
   ctx.moveTo(-R*.98,0);ctx.lineTo(-R*.52,0);
@@ -325,10 +282,10 @@ function update(d){
   degEl.textContent = Math.round(n)+'°';
   dirEl.textContent = info.palace.name + ' · ' + info.palace.dir;
   elEl.textContent  = info.shan + '山 · ' + info.sx + ' · ' + info.wx + '（' + info.beast + '）';
+  guaNameEl.textContent = info.palace.gua;
+  guaTextEl.textContent = info.palace.text;
   draw(n);
 }
-
-/* ========== 传感器 ========== */
 
 function onOri(e){
   var hh=null;
@@ -368,6 +325,8 @@ function init(){
   degEl.textContent='0°';
   dirEl.textContent = info.palace.name + ' · ' + info.palace.dir;
   elEl.textContent  = info.shan + '山 · ' + info.sx + ' · ' + info.wx + '（' + info.beast + '）';
+  guaNameEl.textContent = info.palace.gua;
+  guaTextEl.textContent = info.palace.text;
   stEl.textContent='点击按钮启用方向传感器';
   if(!window.DeviceOrientationEvent){
     stEl.textContent='⚠️ 当前环境不支持方向传感器';
