@@ -12,143 +12,56 @@
 html,body{height:100%;width:100%;overflow:hidden;background:#0a0a0a}
 body{
   font-family:'PingFang SC','Microsoft YaHei',sans-serif;
-  display:flex;justify-content:center;align-items:center;
-  padding:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
   padding-top:env(safe-area-inset-top);
   padding-bottom:env(safe-area-inset-bottom);
-  padding-left:env(safe-area-inset-left);
-  padding-right:env(safe-area-inset-right);
   touch-action:none;
 }
-
-.box{
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  background:#0a0a0a;
+#wrap{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
 }
-
 .title{
-  text-align:center;
-  color:#c9a86a;
-  font-weight:400;
-  letter-spacing:8px;
-  font-size:.72rem;
-  margin-bottom:2px;
-  flex-shrink:0;
-  opacity:.85;
+  text-align:center;color:#c9a86a;font-weight:400;
+  letter-spacing:8px;font-size:.72rem;margin-bottom:2px;opacity:.85;
 }
-
-/* 罗盘容器：以屏幕短边为直径，尽量占满 */
-.cv{
-  position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  width:min(100vw, 78vh);
-  height:min(100vw, 78vh);
-  max-width:100%;
-  flex-shrink:1;
-  margin:0 auto;
-}
-canvas{
-  width:100%;
-  height:100%;
-  display:block;
-  border-radius:50%;
-  filter:drop-shadow(0 10px 24px rgba(0,0,0,.85));
-}
-
-.info{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  margin-top:6px;
-  flex-shrink:0;
-}
-.deg{
-  font-size:1.9rem;
-  font-weight:600;
-  color:#f3e6d0;
-  text-shadow:0 3px 10px #00000080;
-  font-variant-numeric:tabular-nums;
-  line-height:1;
-}
-.dir{
-  font-size:.95rem;
-  letter-spacing:3px;
-  color:#e6c27a;
-  background:rgba(0,0,0,.5);
-  padding:3px 16px;
-  border-radius:30px;
-  border:1px solid #c9a86a50;
-  margin-top:3px;
-}
-.el{
-  font-size:.7rem;
-  letter-spacing:3px;
-  color:#a89e8a;
-  margin-top:2px;
-}
-.st{
-  text-align:center;
-  color:#7a7f8b;
-  font-size:.62rem;
-  margin-top:4px;
-  height:12px;
-  flex-shrink:0;
-}
-.fc{display:flex;justify-content:center;flex-shrink:0}
-.btn{
-  margin-top:8px;
-  background:#2a2318;
-  border:1px solid #c9a86a60;
-  border-radius:60px;
-  color:#e6dbc9;
-  font-size:.8rem;
-  padding:9px 22px;
-  font-weight:500;
-  letter-spacing:.5px;
-  box-shadow:0 8px 16px -6px #000;
-  transition:all .15s;
-  cursor:pointer;
-}
-.btn:hover{background:#3a3020;color:#fff}
+#cvWrap{position:relative;display:block;margin:0 auto}
+canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 24px rgba(0,0,0,.85))}
+.info{display:flex;flex-direction:column;align-items:center;margin-top:6px}
+.deg{font-size:1.9rem;font-weight:600;color:#f3e6d0;text-shadow:0 3px 10px #00000080;font-variant-numeric:tabular-nums;line-height:1}
+.dir{font-size:.95rem;letter-spacing:3px;color:#e6c27a;background:rgba(0,0,0,.5);padding:3px 16px;border-radius:30px;border:1px solid #c9a86a50;margin-top:3px}
+.el{font-size:.7rem;letter-spacing:3px;color:#a89e8a;margin-top:2px}
+.st{text-align:center;color:#7a7f8b;font-size:.62rem;margin-top:4px;height:12px}
+.btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a60;border-radius:60px;color:#e6dbc9;font-size:.8rem;padding:9px 22px;font-weight:500;letter-spacing:.5px;box-shadow:0 8px 16px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .hd{display:none!important}
 </style>
 </head>
 <body>
-<div class="box">
+<div id="wrap">
   <div class="title">· 风 水 罗 盘 ·</div>
-  <div class="cv"><canvas id="cv"></canvas></div>
+  <div id="cvWrap"><canvas id="cv"></canvas></div>
   <div class="info">
     <div class="deg" id="deg">0°</div>
     <div class="dir" id="dir">子 · 北</div>
     <div class="el" id="el">水 · 玄武</div>
   </div>
   <div class="st" id="st">正在等待传感器数据…</div>
-  <div class="fc"><button class="btn" id="btn">🧭 点击启用指南针</button></div>
+  <div><button class="btn" id="btn">🧭 点击启用指南针</button></div>
 </div>
 
 <script>
 (function(){
 var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var cvWrap=document.getElementById('cvWrap');
 var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
     elEl=document.getElementById('el'),stEl=document.getElementById('st'),btn=document.getElementById('btn');
 
-// ---- 高清适配 (iPhone 17 Pro DPR=3) ----
-var LOGIC=900;
-var DPR=Math.min(window.devicePixelRatio||3, 3); // iPhone 17 Pro 是 3
-cv.width=LOGIC*DPR; cv.height=LOGIC*DPR;
-cv.style.width='100%'; cv.style.height='100%';
-ctx.scale(DPR,DPR);
-var W=LOGIC,H=LOGIC;
-
 var heading=0,fHeading=0,active=false,listening=false,last=0,F=0.18;
+var DPR=Math.min(window.devicePixelRatio||2,3);
+var W=800,H=800,R=0;
 
 var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
@@ -163,6 +76,25 @@ if(d<202.5)return'午 · 南';if(d<247.5)return'坤 · 西南';if(d<292.5)return
 function getEl(d){d=((d%360)+360)%360;
 if(d>=337.5||d<22.5)return'水 · 玄武';if(d<67.5)return'土 · 螣蛇';if(d<112.5)return'木 · 青龙';if(d<157.5)return'木 · 青龙';
 if(d<202.5)return'火 · 朱雀';if(d<247.5)return'土 · 勾陈';if(d<292.5)return'金 · 白虎';return'金 · 白虎';}
+
+// 根据屏幕实际大小计算画布尺寸
+function resizeCanvas(){
+  var maxW = window.innerWidth - 4;               // 屏幕宽
+  var reservedH = 210;                            // 下方信息+按钮占用的高度
+  var maxH = window.innerHeight - reservedH;      // 可用于罗盘的高度
+  var size = Math.min(maxW, maxH);                // 取短边，保证是正方形
+  if(size < 200) size = 200;                      // 兜底最小
+  W = size; H = size;
+  cv.width = W * DPR;
+  cv.height = H * DPR;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  cvWrap.style.width = W + 'px';
+  cvWrap.style.height = H + 'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(DPR,DPR);
+  R = Math.min(W,H) * 0.46;
+}
 
 function ringText(cx,cy,r,texts,font,color,startAng,radial){
     ctx.save();ctx.translate(cx,cy);
@@ -192,7 +124,7 @@ function drawTaiji(cx,cy,r){
 }
 
 function draw(h){
-    var cx=W/2,cy=H/2,R=Math.min(W,H)*0.46;
+    var cx=W/2, cy=H/2;
     ctx.clearRect(0,0,W,H);
 
     ctx.beginPath();ctx.arc(cx,cy,R*1.02,0,Math.PI*2);ctx.fillStyle='#1a150a';ctx.fill();
@@ -283,31 +215,32 @@ function start(){
         window.addEventListener('deviceorientation',onOri,true);
         listening=true;stEl.textContent='📡 正在接收方向数据…';
     }else{
-        stEl.textContent='❌ 浏览器不支持方向Heading传感器';
-        btn.classList.add('hd'););update(0);return;
+        stEl.textContent='❌ 浏览器不支持方向传感器';
+        btn.classList.add('hd');update(0);return;
     }
-    setTimeout(function});
-(){if(last===0   )stEl.textContent='⏳ 等待 window传感器数据…';},300.addEventListener0);
+    setTimeout(function(){if(last===0)stEl.textContent='⏳ 等待传感器数据…';},3000);
 }
 
 function ask(){
-   (' if(typeof DeviceOrientationEvent!=='orientationundefined'&&typeof DeviceOrientationEvent.requestchangePermission==='function'){
-        DeviceOrientationEvent',.requestPermission().then(function(s){
-            if(sfunction==='granted'){start();btn.classList.add('hd');}
-            else{stEl.textContent='❌(){ 权限被拒绝';btn.textContentset='重新请求权限';}
-        }).catch(functionTimeout(){stEl.textContent='⚠️ 请求权限失败';});
-    }else(function{start();btn.classList.add('hd');}
-(){}
+    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+        DeviceOrientationEvent.requestPermission().then(function(s){
+            if(s==='granted'){start();btn.classList.add('hd');}
+            else{stEl.textContent='❌ 权限被拒绝';btn.textContent='重新请求权限';}
+        }).catch(function(){stEl.textContent='⚠️ 请求权限失败';});
+    }else{start();btn.classList.add('hd');}
+}
 
 function init(){
-    drawupdate(0);degEl.textContent='0(f°';dirEl.textContent='子 · 北';elEl.textContent='水 · 玄武';
+    resizeCanvas();
+    draw(0);
+    degEl.textContent='0°';dirEl.textContent='子 · 北';elEl.textContent='水 · 玄武';
     stEl.textContent='点击按钮启用方向传感器';
     if(!window.DeviceOrientationEvent){
         stEl.textContent='⚠️ 当前环境不支持方向传感器';
         btn.textContent='不支持传感器';btn.disabled=true;btn.style.opacity='.6';
     }else{btn.addEventListener('click',ask);}
-    // 屏幕旋转 / 尺寸变化时重绘
-    window.addEventListener('resize',function(){update(fHeading);},300);});
+    window.addEventListener('resize',function(){resizeCanvas();update(fHeading);});
+    window.addEventListener('orientationchange',function(){setTimeout(function(){resizeCanvas();update(fHeading);},300);});
 }
 window.addEventListener('load',init);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&listening)update(fHeading);});
