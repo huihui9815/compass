@@ -24,17 +24,17 @@ body{
   align-items:center;justify-content:center;
 }
 .title{
-  text-align:center;color:#c9a86a;font-weight:400;
-  letter-spacing:10px;font-size:.9rem;margin-bottom:2px;opacity:.9;
+  text-align:center;color:#c9a86a;font-weight:500;
+  letter-spacing:12px;font-size:1.1rem;margin-bottom:2px;opacity:.95;
 }
 #cvWrap{position:relative;display:block;margin:0 auto}
 canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0,.85))}
-.info{display:flex;flex-direction:column;align-items:center;margin-top:4px}
-.deg{font-size:3rem;font-weight:700;color:#f3e6d0;text-shadow:0 4px 14px #00000090;font-variant-numeric:tabular-nums;line-height:1}
-.dir{font-size:1.5rem;letter-spacing:5px;color:#e6c27a;background:rgba(0,0,0,.55);padding:6px 26px;border-radius:40px;border:1px solid #c9a86a50;margin-top:4px}
-.el{font-size:1.1rem;letter-spacing:5px;color:#b8ae9a;margin-top:2px}
-.st{text-align:center;color:#7a7f8b;font-size:.8rem;margin-top:4px;height:14px}
-.btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a80;border-radius:60px;color:#f0e6d2;font-size:1.05rem;padding:14px 36px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 22px -6px #000;transition:all .15s;cursor:pointer}
+.info{display:flex;flex-direction:column;align-items:center;margin-top:2px}
+.deg{font-size:3.6rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 16px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
+.dir{font-size:1.8rem;letter-spacing:6px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:6px 30px;border-radius:44px;border:1px solid #c9a86a80;margin-top:4px}
+.el{font-size:1.3rem;letter-spacing:6px;color:#c8bea8;margin-top:2px}
+.st{text-align:center;color:#8a8f9b;font-size:.95rem;margin-top:4px;height:16px}
+.btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:1.2rem;padding:15px 40px;font-weight:700;letter-spacing:1.2px;box-shadow:0 12px 24px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .hd{display:none!important}
 </style>
@@ -46,7 +46,7 @@ canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0
   <div class="info">
     <div class="deg" id="deg">0°</div>
     <div class="dir" id="dir">子 · 北</div>
-    <div class="el" id="el">水 · 玄武</div>
+    <div class="el" id="el">水 · 玄武 · 鼠</div>
   </div>
   <div class="st" id="st">正在等待传感器数据…</div>
   <div><button class="btn" id="btn">🧭 点击启用指南针</button></div>
@@ -66,6 +66,8 @@ var W=800,H=800,R=0;
 var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+// 十二生肖，与十二地支一一对应（子鼠、丑牛...）
+var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
 var GUA=['☰','☱','☲','☳','☴','☵','☶','☷'];
 var XING=['角','亢','氐','房','心','尾','箕','斗','牛','女','虚','危','室','壁','奎','娄','胃','昴','毕','觜','参','井','鬼','柳','星','张','翼','轸'];
 var GUA64=['䷀','䷁','䷂','䷃','䷄','䷅','䷆','䷇','䷈','䷉','䷊','䷋','䷌','䷍','䷎','䷏','䷐','䷑','䷒','䷓','䷔','䷕','䷖','䷗','䷘','䷙','䷚','䷛','䷜','䷝','䷞','䷟','䷠','䷡','䷢','䷣','䷤','䷥','䷦','䷧','䷨','䷩','䷪','䷫','䷬','䷭','䷮','䷯','䷰','䷱','䷲','䷳','䷴','䷵','䷶','䷷','䷸','䷹','䷺','䷻','䷼','䷽','䷾','䷿'];
@@ -73,17 +75,37 @@ var GUA64=['䷀','䷁','䷂','䷃','䷄','䷅','䷆','䷇','䷈','䷉','䷊','�
 function getDir(d){d=((d%360)+360)%360;
 if(d>=337.5||d<22.5)return'子 · 北';if(d<67.5)return'艮 · 东北';if(d<112.5)return'卯 · 东';if(d<157.5)return'巽 · 东南';
 if(d<202.5)return'午 · 南';if(d<247.5)return'坤 · 西南';if(d<292.5)return'酉 · 西';return'乾 · 西北';}
-function getEl(d){d=((d%360)+360)%360;
-if(d>=337.5||d<22.5)return'水 · 玄武';if(d<67.5)return'土 · 螣蛇';if(d<112.5)return'木 · 青龙';if(d<157.5)return'木 · 青龙';
-if(d<202.5)return'火 · 朱雀';if(d<247.5)return'土 · 勾陈';if(d<292.5)return'金 · 白虎';return'金 · 白虎';}
 
-// 动态计算画布尺寸：罗盘尽量大
+// 五行 + 神兽 + 生肖（按 30° 一宫，共 12 宫）
+function getEl(d){
+  d=((d%360)+360)%360;
+  // 每宫 30°，从子(北)开始：子鼠(水玄武)、丑牛(土螣蛇)、寅虎(木青龙)、卯兔(木青龙)、
+  // 辰龙(土勾陈)、巳蛇(火朱雀)、午马(火朱雀)、未羊(土勾陈)、
+  // 申猴(金白虎)、酉鸡(金白虎)、戌狗(土螣蛇)、亥猪(水玄武)
+  var idx=Math.floor(((d+15)%360)/30); // 取中间对齐
+  var arr=[
+    '水 · 玄武 · 鼠',
+    '土 · 螣蛇 · 牛',
+    '木 · 青龙 · 虎',
+    '木 · 青龙 · 兔',
+    '土 · 勾陈 · 龙',
+    '火 · 朱雀 · 蛇',
+    '火 · 朱雀 · 马',
+    '土 · 勾陈 · 羊',
+    '金 · 白虎 · 猴',
+    '金 · 白虎 · 鸡',
+    '土 · 螣蛇 · 狗',
+    '水 · 玄武 · 猪'
+  ];
+  return arr[idx];
+}
+
 function resizeCanvas(){
   var maxW = window.innerWidth - 2;
-  var reservedH = 130;   // 下方信息+按钮的预留高度（压缩到最小，罗盘更大）
+  var reservedH = 260;
   var maxH = window.innerHeight - reservedH;
   var size = Math.min(maxW, maxH);
-  if(size < 220) size = 220;
+  if(size < 200) size = 200;
   W = size; H = size;
   cv.width = W * DPR;
   cv.height = H * DPR;
@@ -93,7 +115,7 @@ function resizeCanvas(){
   cvWrap.style.height = H + 'px';
   ctx.setTransform(1,0,0,1,0,0);
   ctx.scale(DPR,DPR);
-  R = Math.min(W,H) * 0.47;   // 放大半径系数，让盘面更满
+  R = Math.min(W,H) * 0.47;
 }
 
 function ringText(cx,cy,r,texts,font,color,startAng,radial){
@@ -137,17 +159,30 @@ function draw(h){
     ctx.beginPath();ctx.arc(cx,cy,R*.98,0,Math.PI*2);ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
     ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-    ringText(cx,cy,R*.925,GUA64,R*.028+'px sans-serif','#3a2a10',0,false);
-    ringText(cx,cy,R*.875,XING,R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
-    ringText(cx,cy,R*.815,SHAN,'bold '+R*.042+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
-    ringText(cx,cy,R*.755,GAN.concat(ZHI),R*.034+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
-    ringText(cx,cy,R*.68,GUA,R*.072+'px "Segoe UI Symbol",sans-serif','#1a1a1a',0,false);
+    // ===== 环 1：六十四卦 =====
+    ringText(cx,cy,R*.925,GUA64,R*.032+'px sans-serif','#3a2a10',0,false);
 
+    // ===== 环 2：二十八宿 =====
+    ringText(cx,cy,R*.875,XING,R*.034+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
+
+    // ===== 环 3：二十四山 =====
+    ringText(cx,cy,R*.815,SHAN,'bold '+R*.048+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+
+    // ===== 环 4：十二生肖（红字，环绕一圈，与十二地支方位对应）=====
+    ringText(cx,cy,R*.76,SHENGXIAO,'bold '+R*.052+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+
+    // ===== 环 5：天干 + 地支 =====
+    ringText(cx,cy,R*.70,GAN.concat(ZHI),R*.038+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
+
+    // ===== 环 6：八卦符号 =====
+    ringText(cx,cy,R*.63,GUA,R*.080+'px "Segoe UI Symbol",sans-serif','#1a1a1a',0,false);
+
+    // 刻度
     ctx.save();ctx.translate(cx,cy);
     for(var i=0;i<360;i+=5){
         var rad=i*Math.PI/180;
         var isMajor=i%30===0, isCard=i%90===0;
-        var outR=R*.62, inR=isMajor?(isCard?R*.55:R*.57):R*.59;
+        var outR=R*.58, inR=isMajor?(isCard?R*.51:R*.53):R*.55;
         ctx.beginPath();
         ctx.moveTo(Math.sin(rad)*outR,-Math.cos(rad)*outR);
         ctx.lineTo(Math.sin(rad)*inR,-Math.cos(rad)*inR);
@@ -157,22 +192,27 @@ function draw(h){
     }
     ctx.restore();
 
-    ctx.beginPath();ctx.arc(cx,cy,R*.50,0,Math.PI*2);ctx.fillStyle='#fbf3e0';ctx.fill();
+    // 中心白底
+    ctx.beginPath();ctx.arc(cx,cy,R*.46,0,Math.PI*2);ctx.fillStyle='#fbf3e0';ctx.fill();
     ctx.strokeStyle='#8b6f3a';ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,R*.48,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,R*.44,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-    ringText(cx,cy,R*.44,ZHI,'bold '+R*.058+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+    // 内圈十二地支
+    ringText(cx,cy,R*.40,ZHI,'bold '+R*.058+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
 
-    drawTaiji(cx,cy,R*.32);
+    // 太极
+    drawTaiji(cx,cy,R*.28);
 
+    // 十字线
     ctx.save();ctx.translate(cx,cy);
-    ctx.beginPath();ctx.moveTo(-R*.32,0);ctx.lineTo(R*.32,0);
-    ctx.moveTo(0,-R*.32);ctx.lineTo(0,R*.32);
+    ctx.beginPath();ctx.moveTo(-R*.28,0);ctx.lineTo(R*.28,0);
+    ctx.moveTo(0,-R*.28);ctx.lineTo(0,R*.28);
     ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
     ctx.restore();
 
+    // 指针
     ctx.save();ctx.translate(cx,cy);ctx.rotate((-h*Math.PI)/180);
-    var pl=R*.40,pw=R*.035;
+    var pl=R*.36,pw=R*.032;
     ctx.beginPath();ctx.moveTo(0,-pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,pw);ctx.lineTo(-pw*3,0);ctx.closePath();
     ctx.fillStyle='#c81e1e';ctx.shadowColor='#ff000080';ctx.shadowBlur=10;ctx.fill();
     ctx.beginPath();ctx.moveTo(0,pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,-pw);ctx.lineTo(-pw*3,0);ctx.closePath();
@@ -181,6 +221,7 @@ function draw(h){
     ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5;ctx.stroke();
     ctx.restore();
 
+    // 外圈红十字装饰
     ctx.save();ctx.translate(cx,cy);
     ctx.beginPath();
     ctx.moveTo(-R*.98,0);ctx.lineTo(-R*.52,0);
@@ -233,7 +274,7 @@ function ask(){
 function init(){
     resizeCanvas();
     draw(0);
-    degEl.textContent='0°';dirEl.textContent='子 · 北';elEl.textContent='水 · 玄武';
+    degEl.textContent='0°';dirEl.textContent='子 · 北';elEl.textContent='水 · 玄武 · 鼠';
     stEl.textContent='点击按钮启用方向传感器';
     if(!window.DeviceOrientationEvent){
         stEl.textContent='⚠️ 当前环境不支持方向传感器';
