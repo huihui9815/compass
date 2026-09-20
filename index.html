@@ -17,42 +17,49 @@ body{
   touch-action:none;
 }
 #wrap{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:12px;font-size:1rem;margin-bottom:2px;opacity:.95}
+.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:12px;font-size:.9rem;margin-bottom:2px;opacity:.95}
 #cvWrap{position:relative;display:block;margin:0 auto}
-canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0,.85))}
-.info{display:flex;flex-direction:column;align-items:center;margin-top:2px}
-.deg{font-size:3rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 16px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
-.dir{font-size:1.35rem;letter-spacing:4px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:5px 22px;border-radius:40px;border:1px solid #c9a86a80;margin-top:4px}
-.el{font-size:1rem;letter-spacing:2px;color:#c8bea8;margin-top:3px;text-align:center;line-height:1.4}
+canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 22px rgba(0,0,0,.85))}
+.info{display:flex;flex-direction:column;align-items:center;margin-top:1px}
+.deg{font-size:2.2rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 14px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
+.dir{font-size:1.05rem;letter-spacing:3px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:3px 18px;border-radius:30px;border:1px solid #c9a86a80;margin-top:3px}
+.el{font-size:.78rem;letter-spacing:1px;color:#c8bea8;margin-top:2px;text-align:center;line-height:1.3}
 
-/* 卦象提示层 */
+/* 卦象层：默认全部显示六爻 */
 .gua{
-  margin-top:6px;
-  padding:6px 16px;
-  border-radius:14px;
+  margin-top:4px;
+  border-radius:12px;
   background:linear-gradient(180deg,rgba(201,168,106,.12),rgba(201,168,106,.04));
   border:1px solid rgba(201,168,106,.35);
   text-align:center;
-  max-width:92vw;
-  line-height:1.35;
+  max-width:96vw;
+  padding:6px 12px 8px;
 }
 .guaName{
-  font-size:1rem;
-  font-weight:700;
-  color:#f0d78c;
-  letter-spacing:2px;
-  text-shadow:0 2px 8px #000;
+  font-size:.95rem;font-weight:700;color:#f0d78c;
+  letter-spacing:2px;text-shadow:0 2px 6px #000;
 }
 .guaText{
-  font-size:.85rem;
-  color:#d8cbb0;
-  margin-top:2px;
-  letter-spacing:1px;
-  font-style:italic;
+  font-size:.7rem;color:#d8cbb0;margin-top:1px;
+  letter-spacing:.5px;font-style:italic;
 }
+.guaBody{
+  margin-top:4px;
+  padding-top:4px;
+  border-top:1px solid rgba(201,168,106,.2);
+  display:flex;flex-direction:column;gap:1px;
+  text-align:left;
+}
+.yao{
+  font-size:.7rem;color:#e6dcc4;letter-spacing:.3px;line-height:1.3;
+  display:flex;gap:6px;
+}
+.yaoNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:32px}
+.yaoText{flex:1}
+.yaoTip{font-size:.6rem;color:#8a7f68;text-align:center;margin-top:3px;letter-spacing:1px}
 
-.st{text-align:center;color:#8a8f9b;font-size:.8rem;margin-top:4px;height:14px}
-.btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:1rem;padding:12px 30px;font-weight:600;letter-spacing:1px;box-shadow:0 12px 24px -6px #000;transition:all .15s;cursor:pointer}
+.st{text-align:center;color:#8a8f9b;font-size:.68rem;margin-top:3px;height:10px}
+.btn{margin-top:5px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:.9rem;padding:10px 24px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 20px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .hd{display:none!important}
 </style>
@@ -66,9 +73,11 @@ canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0
     <div class="dir" id="dir">坎 · 北</div>
     <div class="el" id="el">子山 · 鼠 · 水（玄武）</div>
   </div>
-  <div class="gua" id="guaBox">
+  <div class="gua">
     <div class="guaName" id="guaName">坎为水</div>
     <div class="guaText" id="guaText">水洊至，习坎；君子以常德行</div>
+    <div class="guaBody" id="guaBody"></div>
+    <div class="yaoTip">六爻由下往上</div>
   </div>
   <div class="st" id="st">正在等待传感器数据…</div>
   <div><button class="btn" id="btn">🧭 点击启用指南针</button></div>
@@ -80,7 +89,8 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 var cvWrap=document.getElementById('cvWrap');
 var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
     elEl=document.getElementById('el'),stEl=document.getElementById('st'),btn=document.getElementById('btn');
-var guaNameEl=document.getElementById('guaName'),guaTextEl=document.getElementById('guaText');
+var guaNameEl=document.getElementById('guaName'),guaTextEl=document.getElementById('guaText'),
+    guaBodyEl=document.getElementById('guaBody');
 
 var heading=0,fHeading=0,active=false,listening=false,last=0,F=0.18;
 var DPR=Math.min(window.devicePixelRatio||2,3);
@@ -91,15 +101,79 @@ var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙
 var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+
 var BAGUA=[
-  {s:'☵', name:'坎', angle:0,   dir:'北',   gua:'坎为水', text:'水洊至，习坎；君子以常德行'},
-  {s:'☶', name:'艮', angle:45,  dir:'东北', gua:'艮为山', text:'兼山，艮；君子以思不出其位'},
-  {s:'☳', name:'震', angle:90,  dir:'东',   gua:'震为雷', text:'洊雷，震；君子以恐惧修省'},
-  {s:'☴', name:'巽', angle:135, dir:'东南', gua:'巽为风', text:'随风，巽；君子以申命行事'},
-  {s:'☲', name:'离', angle:180, dir:'南',   gua:'离为火', text:'明两作，离；大人以继明照于四方'},
-  {s:'☷', name:'坤', angle:225, dir:'西南', gua:'坤为地', text:'地势坤，君子以厚德载物'},
-  {s:'☱', name:'兑', angle:270, dir:'西',   gua:'兑为泽', text:'丽泽，兑；君子以朋友讲习'},
-  {s:'☰', name:'乾', angle:315, dir:'西北', gua:'乾为天', text:'天行健，君子以自强不息'}
+  {s:'☵', name:'坎', angle:0,   dir:'北',
+   gua:'坎为水', text:'水洊至，习坎；君子以常德行',
+   yao:[['初六','习坎，入于坎窞，凶'],
+        ['九二','坎有险，求小得'],
+        ['六三','来之坎坎，险且枕，入于坎窞，勿用'],
+        ['六四','樽酒簋贰，用缶，纳约自牖，终无咎'],
+        ['九五','坎不盈，祗既平，无咎'],
+        ['上六','系用徽纆，寘于丛棘，三岁不得，凶']]},
+
+  {s:'☶', name:'艮', angle:45,  dir:'东北',
+   gua:'艮为山', text:'兼山，艮；君子以思不出其位',
+   yao:[['初六','艮其趾，无咎，利永贞'],
+        ['六二','艮其腓，不拯其随，其心不快'],
+        ['九三','艮其限，列其夤，厉薰心'],
+        ['六四','艮其身，无咎'],
+        ['六五','艮其辅，言有序，悔亡'],
+        ['上九','敦艮，吉']]},
+
+  {s:'☳', name:'震', angle:90,  dir:'东',
+   gua:'震为雷', text:'洊雷，震；君子以恐惧修省',
+   yao:[['初九','震来虩虩，后笑言哑哑，吉'],
+        ['六二','震来厉，亿丧贝，跻于九陵，勿逐，七日得'],
+        ['六三','震苏苏，震行无眚'],
+        ['九四','震遂泥'],
+        ['六五','震往来厉，亿无丧，有事'],
+        ['上六','震索索，视矍矍，征凶。震不于其躬，于其邻，无咎。婚媾有言']]},
+
+  {s:'☴', name:'巽', angle:135, dir:'东南',
+   gua:'巽为风', text:'随风，巽；君子以申命行事',
+   yao:[['初六','进退，利武人之贞'],
+        ['九二','巽在床下，用史巫纷若，吉无咎'],
+        ['九三','频巽，吝'],
+        ['六四','悔亡，田获三品'],
+        ['九五','贞吉悔亡，无不利。无初有终，先庚三日，后庚三日，吉'],
+        ['上九','巽在床下，丧其资斧，贞凶']]},
+
+  {s:'☲', name:'离', angle:180, dir:'南',
+   gua:'离为火', text:'明两作，离；大人以继明照于四方',
+   yao:[['初九','履错然，敬之无咎'],
+        ['六二','黄离，元吉'],
+        ['九三','日昃之离，不鼓缶而歌，则大耋之嗟，凶'],
+        ['九四','突如其来如，焚如，死如，弃如'],
+        ['六五','出涕沱若，戚嗟若，吉'],
+        ['上九','王用出征，有嘉折首，获匪其丑，无咎']]},
+
+  {s:'☷', name:'坤', angle:225, dir:'西南',
+   gua:'坤为地', text:'地势坤，君子以厚德载物',
+   yao:[['初六','履霜，坚冰至'],
+        ['六二','直方大，不习无不利'],
+        ['六三','含章可贞。或从王事，无成有终'],
+        ['六四','括囊，无咎无誉'],
+        ['六五','黄裳，元吉'],
+        ['上六','龙战于野，其血玄黄']]},
+
+  {s:'☱', name:'兑', angle:270, dir:'西',
+   gua:'兑为泽', text:'丽泽，兑；君子以朋友讲习',
+   yao:[['初九','和兑，吉'],
+        ['九二','孚兑，吉，悔亡'],
+        ['六三','来兑，凶'],
+        ['九四','商兑未宁，介疾有喜'],
+        ['九五','孚于剥，有厉'],
+        ['上六','引兑']]},
+
+  {s:'☰', name:'乾', angle:315, dir:'西北',
+   gua:'乾为天', text:'天行健，君子以自强不息',
+   yao:[['初九','潜龙勿用'],
+        ['九二','见龙在田，利见大人'],
+        ['九三','君子终日乾乾，夕惕若厉，无咎'],
+        ['九四','或跃在渊，无咎'],
+        ['九五','飞龙在天，利见大人'],
+        ['上九','亢龙有悔']]}
 ];
 
 var GUA64_BY_PALACE = [
@@ -130,15 +204,15 @@ function getInfo(d){
     {wx:'金', sx:'白虎'},{wx:'金', sx:'白虎'},{wx:'土', sx:'螣蛇'},{wx:'水', sx:'玄武'}
   ];
   var w = wuxingArr[sxIdx];
-  return {palace:palace, shan:shan, sx:sx, wx:w.wx, beast:w.sx};
+  return {palace:palace, shan:shan, sx:sx, wx:w.wx, beast:w.sx, palaceIdx:palaceIdx};
 }
 
 function resizeCanvas(){
   var maxW = window.innerWidth - 2;
-  var reservedH = 320;
+  var reservedH = 400;  // 六爻常显，预留更多空间
   var maxH = window.innerHeight - reservedH;
   var size = Math.min(maxW, maxH);
-  if(size < 200) size = 200;
+  if(size < 160) size = 160;
   W = size; H = size;
   cv.width = W * DPR; cv.height = H * DPR;
   cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -276,14 +350,30 @@ function draw(h){
   ctx.restore();
 }
 
+// 缓存上一次显示，避免频繁重建 DOM
+var lastPalaceIdx = -1;
+
+function renderGua(palaceIdx){
+  if(palaceIdx === lastPalaceIdx) return;
+  lastPalaceIdx = palaceIdx;
+  var p = BAGUA[palaceIdx];
+  guaNameEl.textContent = p.gua;
+  guaTextEl.textContent = p.text;
+  var html = '';
+  for(var i=0;i<p.yao.length;i++){
+    html += '<div class="yao"><span class="yaoNo">' + p.yao[i][0] + '</span>' +
+            '<span class="yaoText">' + p.yao[i][1] + '</span></div>';
+  }
+  guaBodyEl.innerHTML = html;
+}
+
 function update(d){
   var n=((d%360)+360)%360;
   var info = getInfo(n);
   degEl.textContent = Math.round(n)+'°';
   dirEl.textContent = info.palace.name + ' · ' + info.palace.dir;
   elEl.textContent  = info.shan + '山 · ' + info.sx + ' · ' + info.wx + '（' + info.beast + '）';
-  guaNameEl.textContent = info.palace.gua;
-  guaTextEl.textContent = info.palace.text;
+  renderGua(info.palaceIdx);
   draw(n);
 }
 
@@ -320,13 +410,7 @@ function ask(){
 
 function init(){
   resizeCanvas();
-  draw(0);
-  var info = getInfo(0);
-  degEl.textContent='0°';
-  dirEl.textContent = info.palace.name + ' · ' + info.palace.dir;
-  elEl.textContent  = info.shan + '山 · ' + info.sx + ' · ' + info.wx + '（' + info.beast + '）';
-  guaNameEl.textContent = info.palace.gua;
-  guaTextEl.textContent = info.palace.text;
+  update(0);
   stEl.textContent='点击按钮启用方向传感器';
   if(!window.DeviceOrientationEvent){
     stEl.textContent='⚠️ 当前环境不支持方向传感器';
