@@ -17,49 +17,68 @@ body{
   touch-action:none;
 }
 #wrap{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:12px;font-size:.9rem;margin-bottom:2px;opacity:.95}
+.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:12px;font-size:.85rem;margin-bottom:2px;opacity:.95}
 #cvWrap{position:relative;display:block;margin:0 auto}
 canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 22px rgba(0,0,0,.85))}
 .info{display:flex;flex-direction:column;align-items:center;margin-top:1px}
-.deg{font-size:2.2rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 14px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
-.dir{font-size:1.05rem;letter-spacing:3px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:3px 18px;border-radius:30px;border:1px solid #c9a86a80;margin-top:3px}
-.el{font-size:.78rem;letter-spacing:1px;color:#c8bea8;margin-top:2px;text-align:center;line-height:1.3}
+.deg{font-size:1.9rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 14px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
+.dir{font-size:.95rem;letter-spacing:3px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:2px 16px;border-radius:30px;border:1px solid #c9a86a80;margin-top:2px}
+.el{font-size:.72rem;letter-spacing:1px;color:#c8bea8;margin-top:1px;text-align:center;line-height:1.3}
 
-/* 卦象层：默认全部显示六爻 */
+/* 卦象层 */
 .gua{
-  margin-top:4px;
-  border-radius:12px;
+  margin-top:3px;
+  border-radius:10px;
   background:linear-gradient(180deg,rgba(201,168,106,.12),rgba(201,168,106,.04));
   border:1px solid rgba(201,168,106,.35);
   text-align:center;
   max-width:96vw;
-  padding:6px 12px 8px;
+  padding:5px 10px 6px;
 }
 .guaName{
-  font-size:.95rem;font-weight:700;color:#f0d78c;
+  font-size:.88rem;font-weight:700;color:#f0d78c;
   letter-spacing:2px;text-shadow:0 2px 6px #000;
 }
+.guaCiphr{
+  font-size:.7rem;color:#e6d28a;margin-top:1px;
+  letter-spacing:.5px;font-weight:600;
+}
+.guaExpl{
+  margin-top:2px;
+  padding:2px 0 2px;
+  border-top:1px dashed rgba(201,168,106,.25);
+  display:flex;flex-direction:column;gap:0;
+  text-align:left;
+}
+.expl{
+  font-size:.62rem;color:#c8bea8;line-height:1.25;
+  display:flex;gap:4px;
+}
+.explNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:14px}
+.explText{flex:1}
 .guaText{
-  font-size:.7rem;color:#d8cbb0;margin-top:1px;
-  letter-spacing:.5px;font-style:italic;
+  font-size:.65rem;color:#b8ac92;margin-top:2px;
+  padding-top:2px;
+  border-top:1px dashed rgba(201,168,106,.25);
+  letter-spacing:.3px;font-style:italic;
 }
 .guaBody{
-  margin-top:4px;
-  padding-top:4px;
-  border-top:1px solid rgba(201,168,106,.2);
-  display:flex;flex-direction:column;gap:1px;
+  margin-top:2px;
+  padding-top:2px;
+  border-top:1px dashed rgba(201,168,106,.25);
+  display:flex;flex-direction:column;gap:0;
   text-align:left;
 }
 .yao{
-  font-size:.7rem;color:#e6dcc4;letter-spacing:.3px;line-height:1.3;
-  display:flex;gap:6px;
+  font-size:.63rem;color:#e6dcc4;letter-spacing:.2px;line-height:1.25;
+  display:flex;gap:5px;
 }
-.yaoNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:32px}
+.yaoNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:28px}
 .yaoText{flex:1}
-.yaoTip{font-size:.6rem;color:#8a7f68;text-align:center;margin-top:3px;letter-spacing:1px}
+.yaoTip{font-size:.55rem;color:#8a7f68;text-align:center;margin-top:2px;letter-spacing:1px}
 
-.st{text-align:center;color:#8a8f9b;font-size:.68rem;margin-top:3px;height:10px}
-.btn{margin-top:5px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:.9rem;padding:10px 24px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 20px -6px #000;transition:all .15s;cursor:pointer}
+.st{text-align:center;color:#8a8f9b;font-size:.6rem;margin-top:2px;height:8px}
+.btn{margin-top:4px;background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:.85rem;padding:9px 22px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 20px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .hd{display:none!important}
 </style>
@@ -75,9 +94,11 @@ canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 22px rgba(0,0,0
   </div>
   <div class="gua">
     <div class="guaName" id="guaName">坎为水</div>
-    <div class="guaText" id="guaText">水洊至，习坎；君子以常德行</div>
+    <div class="guaCiphr" id="guaCiphr"></div>
+    <div class="guaExpl" id="guaExpl"></div>
+    <div class="guaText" id="guaText"></div>
     <div class="guaBody" id="guaBody"></div>
-    <div class="yaoTip">六爻由下往上</div>
+    <div class="yaoTip">卦辞 · 象传 · 六爻（由下往上）</div>
   </div>
   <div class="st" id="st">正在等待传感器数据…</div>
   <div><button class="btn" id="btn">🧭 点击启用指南针</button></div>
@@ -89,7 +110,8 @@ var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 var cvWrap=document.getElementById('cvWrap');
 var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
     elEl=document.getElementById('el'),stEl=document.getElementById('st'),btn=document.getElementById('btn');
-var guaNameEl=document.getElementById('guaName'),guaTextEl=document.getElementById('guaText'),
+var guaNameEl=document.getElementById('guaName'),guaCiphrEl=document.getElementById('guaCiphr'),
+    guaExplEl=document.getElementById('guaExpl'),guaTextEl=document.getElementById('guaText'),
     guaBodyEl=document.getElementById('guaBody');
 
 var heading=0,fHeading=0,active=false,listening=false,last=0,F=0.18;
@@ -102,9 +124,16 @@ var ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
 
+// 八纯卦：卦名、卦辞原文、卦辞释义、象传、六爻
 var BAGUA=[
   {s:'☵', name:'坎', angle:0,   dir:'北',
-   gua:'坎为水', text:'水洊至，习坎；君子以常德行',
+   gua:'坎为水',
+   ciphr:'坎：习坎，有孚，维心亨，行有尚。',
+   expl:[['习坎','重险'],
+         ['有孚','心怀诚信'],
+         ['维心亨','内心通达'],
+         ['行有尚','行动可嘉尚']],
+   text:'水洊至，习坎；君子以常德行',
    yao:[['初六','习坎，入于坎窞，凶'],
         ['九二','坎有险，求小得'],
         ['六三','来之坎坎，险且枕，入于坎窞，勿用'],
@@ -113,7 +142,13 @@ var BAGUA=[
         ['上六','系用徽纆，寘于丛棘，三岁不得，凶']]},
 
   {s:'☶', name:'艮', angle:45,  dir:'东北',
-   gua:'艮为山', text:'兼山，艮；君子以思不出其位',
+   gua:'艮为山',
+   ciphr:'艮：艮其背，不获其身；行其庭，不见其人，无咎。',
+   expl:[['艮其背','止于所不见'],
+         ['不获其身','忘我'],
+         ['行其庭','行于庭中'],
+         ['不见其人','不见外物']],
+   text:'兼山，艮；君子以思不出其位',
    yao:[['初六','艮其趾，无咎，利永贞'],
         ['六二','艮其腓，不拯其随，其心不快'],
         ['九三','艮其限，列其夤，厉薰心'],
@@ -122,7 +157,13 @@ var BAGUA=[
         ['上九','敦艮，吉']]},
 
   {s:'☳', name:'震', angle:90,  dir:'东',
-   gua:'震为雷', text:'洊雷，震；君子以恐惧修省',
+   gua:'震为雷',
+   ciphr:'震：亨。震来虩虩，笑言哑哑；震惊百里，不丧匕鬯。',
+   expl:[['亨','通达'],
+         ['虩虩','恐惧貌'],
+         ['哑哑','笑语声'],
+         ['匕鬯','祭器与香酒']],
+   text:'洊雷，震；君子以恐惧修省',
    yao:[['初九','震来虩虩，后笑言哑哑，吉'],
         ['六二','震来厉，亿丧贝，跻于九陵，勿逐，七日得'],
         ['六三','震苏苏，震行无眚'],
@@ -131,16 +172,26 @@ var BAGUA=[
         ['上六','震索索，视矍矍，征凶。震不于其躬，于其邻，无咎。婚媾有言']]},
 
   {s:'☴', name:'巽', angle:135, dir:'东南',
-   gua:'巽为风', text:'随风，巽；君子以申命行事',
+   gua:'巽为风',
+   ciphr:'巽：小亨，利有攸往，利见大人。',
+   expl:[['小亨','小有通达'],
+         ['利有攸往','宜有所往'],
+         ['利见大人','宜见大人']],
+   text:'随风，巽；君子以申命行事',
    yao:[['初六','进退，利武人之贞'],
-        ['九二','巽在床下，用史巫纷若，吉无咎'],
+        ['九二ao','巽在床下，用史巫纷若，吉无咎'],
         ['九三','频巽，吝'],
         ['六四','悔亡，田获三品'],
         ['九五','贞吉悔亡，无不利。无初有终，先庚三日，后庚三日，吉'],
         ['上九','巽在床下，丧其资斧，贞凶']]},
 
   {s:'☲', name:'离', angle:180, dir:'南',
-   gua:'离为火', text:'明两作，离；大人以继明照于四方',
+   gua:'离为火',
+   ciphr:'离：利贞，亨。畜牝牛，吉。',
+   expl:[['利贞','利于守正'],
+         ['亨','通达'],
+         ['畜牝牛','养母牛（喻柔顺）']],
+   text:'明两作，离；大人以继明照于四方',
    yao:[['初九','履错然，敬之无咎'],
         ['六二','黄离，元吉'],
         ['九三','日昃之离，不鼓缶而歌，则大耋之嗟，凶'],
@@ -149,7 +200,13 @@ var BAGUA=[
         ['上九','王用出征，有嘉折首，获匪其丑，无咎']]},
 
   {s:'☷', name:'坤', angle:225, dir:'西南',
-   gua:'坤为地', text:'地势坤，君子以厚德载物',
+   gua:'坤为地',
+   ciphr:'坤：元亨，利牝马之贞。君子有攸往，先迷后得主，利。',
+   expl:[['元亨','大通'],
+         ['牝马之贞','母马般的柔顺守正'],
+         ['先迷后得','先迷失后得主'],
+         ['利','有利']],
+   text:'地势坤，君子以厚德载物',
    yao:[['初六','履霜，坚冰至'],
         ['六二','直方大，不习无不利'],
         ['六三','含章可贞。或从王事，无成有终'],
@@ -158,8 +215,12 @@ var BAGUA=[
         ['上六','龙战于野，其血玄黄']]},
 
   {s:'☱', name:'兑', angle:270, dir:'西',
-   gua:'兑为泽', text:'丽泽，兑；君子以朋友讲习',
-   yao:[['初九','和兑，吉'],
+   gua:'兑为泽',
+   ciphr:'兑：亨，利贞。',
+   expl:[['亨','通达'],
+         ['利贞','利于守正']],
+   text:'丽泽，兑；君子以朋友讲习',
+   y:[['初九','和兑，吉'],
         ['九二','孚兑，吉，悔亡'],
         ['六三','来兑，凶'],
         ['九四','商兑未宁，介疾有喜'],
@@ -167,7 +228,13 @@ var BAGUA=[
         ['上六','引兑']]},
 
   {s:'☰', name:'乾', angle:315, dir:'西北',
-   gua:'乾为天', text:'天行健，君子以自强不息',
+   gua:'乾为天',
+   ciphr:'乾：元，亨，利，贞。',
+   expl:[['元','元始、开端'],
+         ['亨','通达'],
+         ['利','和合相宜'],
+         ['贞','守正固持']],
+   text:'天行健，君子以自强不息',
    yao:[['初九','潜龙勿用'],
         ['九二','见龙在田，利见大人'],
         ['九三','君子终日乾乾，夕惕若厉，无咎'],
@@ -209,10 +276,10 @@ function getInfo(d){
 
 function resizeCanvas(){
   var maxW = window.innerWidth - 2;
-  var reservedH = 400;  // 六爻常显，预留更多空间
+  var reservedH = 480; // 卦辞 + 释义 + 象传 + 六爻，预留更多
   var maxH = window.innerHeight - reservedH;
   var size = Math.min(maxW, maxH);
-  if(size < 160) size = 160;
+  if(size < 140) size = 140;
   W = size; H = size;
   cv.width = W * DPR; cv.height = H * DPR;
   cv.style.width = W + 'px'; cv.style.height = H + 'px';
@@ -350,21 +417,31 @@ function draw(h){
   ctx.restore();
 }
 
-// 缓存上一次显示，避免频繁重建 DOM
 var lastPalaceIdx = -1;
 
 function renderGua(palaceIdx){
   if(palaceIdx === lastPalaceIdx) return;
   lastPalaceIdx = palaceIdx;
   var p = BAGUA[palaceIdx];
+
   guaNameEl.textContent = p.gua;
-  guaTextEl.textContent = p.text;
-  var html = '';
-  for(var i=0;i<p.yao.length;i++){
-    html += '<div class="yao"><span class="yaoNo">' + p.yao[i][0] + '</span>' +
-            '<span class="yaoText">' + p.yao[i][1] + '</span></div>';
+  guaCiphrEl.textContent = p.ciphr;
+
+  var explHtml = '';
+  for(var i=0;i<p.expl.length;i++){
+    explHtml += '<div class="expl"><span class="explNo">' + p.expl[i][0] + '</span>' +
+                '<span class="explText">' + p.expl[i][1] + '</span></div>';
   }
-  guaBodyEl.innerHTML = html;
+  guaExplEl.innerHTML = explHtml;
+
+  guaTextEl.textContent = p.text;
+
+  var yaoHtml = '';
+  for(var j=0;j<p.yao.length;j++){
+    yaoHtml += '<div class="yao"><span class="yaoNo">' + p.yao[j][0] + '</span>' +
+               '<span class="yaoText">' + p.yao[j][1] + '</span></div>';
+  }
+  guaBodyEl.innerHTML = yaoHtml;
 }
 
 function update(d){
