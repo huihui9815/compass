@@ -25,16 +25,16 @@ body{
 }
 .title{
   text-align:center;color:#c9a86a;font-weight:400;
-  letter-spacing:8px;font-size:.72rem;margin-bottom:2px;opacity:.85;
+  letter-spacing:10px;font-size:.9rem;margin-bottom:2px;opacity:.9;
 }
 #cvWrap{position:relative;display:block;margin:0 auto}
-canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 24px rgba(0,0,0,.85))}
-.info{display:flex;flex-direction:column;align-items:center;margin-top:6px}
-.deg{font-size:1.9rem;font-weight:600;color:#f3e6d0;text-shadow:0 3px 10px #00000080;font-variant-numeric:tabular-nums;line-height:1}
-.dir{font-size:.95rem;letter-spacing:3px;color:#e6c27a;background:rgba(0,0,0,.5);padding:3px 16px;border-radius:30px;border:1px solid #c9a86a50;margin-top:3px}
-.el{font-size:.7rem;letter-spacing:3px;color:#a89e8a;margin-top:2px}
-.st{text-align:center;color:#7a7f8b;font-size:.62rem;margin-top:4px;height:12px}
-.btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a60;border-radius:60px;color:#e6dbc9;font-size:.8rem;padding:9px 22px;font-weight:500;letter-spacing:.5px;box-shadow:0 8px 16px -6px #000;transition:all .15s;cursor:pointer}
+canvas{display:block;border-radius:50%;filter:drop-shadow(0 12px 26px rgba(0,0,0,.85))}
+.info{display:flex;flex-direction:column;align-items:center;margin-top:4px}
+.deg{font-size:3rem;font-weight:700;color:#f3e6d0;text-shadow:0 4px 14px #00000090;font-variant-numeric:tabular-nums;line-height:1}
+.dir{font-size:1.5rem;letter-spacing:5px;color:#e6c27a;background:rgba(0,0,0,.55);padding:6px 26px;border-radius:40px;border:1px solid #c9a86a50;margin-top:4px}
+.el{font-size:1.1rem;letter-spacing:5px;color:#b8ae9a;margin-top:2px}
+.st{text-align:center;color:#7a7f8b;font-size:.8rem;margin-top:4px;height:14px}
+.btn{margin-top:8px;background:#2a2318;border:1px solid #c9a86a80;border-radius:60px;color:#f0e6d2;font-size:1.05rem;padding:14px 36px;font-weight:600;letter-spacing:1px;box-shadow:0 10px 22px -6px #000;transition:all .15s;cursor:pointer}
 .btn:active{transform:scale(.97)}
 .hd{display:none!important}
 </style>
@@ -77,13 +77,13 @@ function getEl(d){d=((d%360)+360)%360;
 if(d>=337.5||d<22.5)return'水 · 玄武';if(d<67.5)return'土 · 螣蛇';if(d<112.5)return'木 · 青龙';if(d<157.5)return'木 · 青龙';
 if(d<202.5)return'火 · 朱雀';if(d<247.5)return'土 · 勾陈';if(d<292.5)return'金 · 白虎';return'金 · 白虎';}
 
-// 根据屏幕实际大小计算画布尺寸
+// 动态计算画布尺寸：罗盘尽量大
 function resizeCanvas(){
-  var maxW = window.innerWidth - 4;               // 屏幕宽
-  var reservedH = 210;                            // 下方信息+按钮占用的高度
-  var maxH = window.innerHeight - reservedH;      // 可用于罗盘的高度
-  var size = Math.min(maxW, maxH);                // 取短边，保证是正方形
-  if(size < 200) size = 200;                      // 兜底最小
+  var maxW = window.innerWidth - 2;
+  var reservedH = 130;   // 下方信息+按钮的预留高度（压缩到最小，罗盘更大）
+  var maxH = window.innerHeight - reservedH;
+  var size = Math.min(maxW, maxH);
+  if(size < 220) size = 220;
   W = size; H = size;
   cv.width = W * DPR;
   cv.height = H * DPR;
@@ -93,7 +93,7 @@ function resizeCanvas(){
   cvWrap.style.height = H + 'px';
   ctx.setTransform(1,0,0,1,0,0);
   ctx.scale(DPR,DPR);
-  R = Math.min(W,H) * 0.46;
+  R = Math.min(W,H) * 0.47;   // 放大半径系数，让盘面更满
 }
 
 function ringText(cx,cy,r,texts,font,color,startAng,radial){
@@ -137,11 +137,11 @@ function draw(h){
     ctx.beginPath();ctx.arc(cx,cy,R*.98,0,Math.PI*2);ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
     ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-    ringText(cx,cy,R*.925,GUA64,R*.026+'px sans-serif','#3a2a10',0,false);
-    ringText(cx,cy,R*.875,XING,R*.028+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
-    ringText(cx,cy,R*.815,SHAN,'bold '+R*.038+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
-    ringText(cx,cy,R*.755,GAN.concat(ZHI),R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
-    ringText(cx,cy,R*.68,GUA,R*.065+'px "Segoe UI Symbol",sans-serif','#1a1a1a',0,false);
+    ringText(cx,cy,R*.925,GUA64,R*.028+'px sans-serif','#3a2a10',0,false);
+    ringText(cx,cy,R*.875,XING,R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
+    ringText(cx,cy,R*.815,SHAN,'bold '+R*.042+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+    ringText(cx,cy,R*.755,GAN.concat(ZHI),R*.034+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
+    ringText(cx,cy,R*.68,GUA,R*.072+'px "Segoe UI Symbol",sans-serif','#1a1a1a',0,false);
 
     ctx.save();ctx.translate(cx,cy);
     for(var i=0;i<360;i+=5){
@@ -161,7 +161,7 @@ function draw(h){
     ctx.strokeStyle='#8b6f3a';ctx.lineWidth=2;ctx.stroke();
     ctx.beginPath();ctx.arc(cx,cy,R*.48,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-    ringText(cx,cy,R*.44,ZHI,'bold '+R*.052+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
+    ringText(cx,cy,R*.44,ZHI,'bold '+R*.058+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
 
     drawTaiji(cx,cy,R*.32);
 
