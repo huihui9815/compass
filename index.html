@@ -147,6 +147,8 @@ var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙
 var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
 var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
 var DIRS8=['北','东北','东','东南','南','西南','西','西北'];
+// 五行环（八方位）：北水、东北土、东木、东南木、南火、西南土、西金、西北金
+var WUXING8=['水','土','木','木','火','土','金','金'];
 
 var BAGUA=[
   {s:'☵', name:'坎', angle:0, dir:'北',
@@ -313,7 +315,6 @@ function resizeCanvas(){
   R = Math.min(W,H) * 0.47;
 }
 
-// 通用：把文字沿圆环排布
 function ringText(cx,cy,r,texts,font,color,startAng,radial){
   ctx.save();ctx.translate(cx,cy);
   ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
@@ -334,7 +335,7 @@ function ringText(cx,cy,r,texts,font,color,startAng,radial){
 function drawDirs8(cx,cy,r,headingDeg){
   ctx.save();
   ctx.translate(cx,cy);
-  ctx.rotate(-headingDeg * Math.PI / 180); // 关键：整个八方位层跟随朝向反向旋转
+  ctx.rotate(-headingDeg * Math.PI / 180);
   ctx.font = 'bold ' + (r * 0.20) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
   for(var i=0;i<8;i++){
@@ -343,6 +344,24 @@ function drawDirs8(cx,cy,r,headingDeg){
     var y = -Math.cos(a) * r;
     ctx.fillStyle = (i===0) ? '#8b1a1a' : '#5a3010';
     ctx.fillText(DIRS8[i], x, y);
+  }
+  ctx.restore();
+}
+
+// 五行环（跟随罗盘旋转）
+function drawWuxing8(cx,cy,r,headingDeg){
+  var colors = {'水':'#1a4a8b','火':'#8b1a1a','木':'#1a5a2a','金':'#8b6a1a','土':'#7a3a10'};
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(-headingDeg * Math.PI / 180);
+  ctx.font = 'bold ' + (r * 0.20) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(var i=0;i<8;i++){
+    var a = (i*45) * Math.PI/180;
+    var x = Math.sin(a) * r;
+    var y = -Math.cos(a) * r;
+    ctx.fillStyle = colors[WUXING8[i]] || '#3a2a10';
+    ctx.fillText(WUXING8[i], x, y);
   }
   ctx.restore();
 }
@@ -404,7 +423,7 @@ function draw(h){
   ctx.beginPath();ctx.arc(cx,cy,R*.98,0,Math.PI*2);ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
   ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-  // === 各层文字（全部固定在盘面，跟着盘面转） ===
+  // === 固定层（不随罗盘转） ===
   drawGua64(cx,cy,R*.92,R*.028+'px sans-serif','#3a2a10');
   ringText(cx,cy,R*.86,XING,R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
   ringText(cx,cy,R*.80,SHAN,'bold '+R*.046+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
@@ -432,8 +451,9 @@ function draw(h){
   ctx.strokeStyle='#8b6f3a';ctx.lineWidth=2;ctx.stroke();
   ctx.beginPath();ctx.arc(cx,cy,R*.42,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
 
-  // === 八方位：跟随罗盘旋转 ===
-  drawDirs8(cx,cy,R*.375,h);
+  // === 跟随罗盘旋转的层 ===
+  drawDirs8(cx,cy,R*.375,h);       // 内圈八方位
+  drawWuxing8(cx,cy,R*.485,h);     // 五行环（在八方位外、刻度内）
 
   // 太极
   drawTaiji(cx,cy,R*.26);
@@ -445,7 +465,7 @@ function draw(h){
   ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
   ctx.restore();
 
-  // 指针（指向正上方，代表设备朝向）
+  // 指针（固定指向正上方，代表设备朝向）
   ctx.save();ctx.translate(cx,cy);
   var pl=R*.34,pw=R*.030;
   ctx.beginPath();ctx.moveTo(0,-pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,pw);ctx.lineTo(-pw*3,0);ctx.closePath();
@@ -456,7 +476,7 @@ function draw(h){
   ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5;ctx.stroke();
   ctx.restore();
 
-  // 外圈红十字（固定装饰，不转）
+  // 外圈红十字（固定装饰）
   ctx.save();ctx.translate(cx,cy);
   ctx.beginPath();
   ctx.moveTo(-R*.98,0);ctx.lineTo(-R*.52,0);
