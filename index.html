@@ -1,619 +1,601 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a0a">
-<title>罗盘 · 指南针</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-html,body{height:100%;width:100%;overflow:hidden;background:#0a0a0a}
-body{
-  font-family:'PingFang SC','Microsoft YaHei',sans-serif;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
-  touch-action:none;
-}
-#wrap{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
-.title{text-align:center;color:#c9a86a;font-weight:500;letter-spacing:10px;font-size:.8rem;margin-bottom:2px;opacity:.9}
-#cvWrap{position:relative;display:block;margin:0 auto}
-canvas{display:block;border-radius:50%;filter:drop-shadow(0 10px 22px rgba(0,0,0,.85))}
-.info{display:flex;flex-direction:column;align-items:center;margin-top:1px}
-.deg{font-size:1.9rem;font-weight:700;color:#f7ead0;text-shadow:0 4px 14px #000000a0;font-variant-numeric:tabular-nums;line-height:1}
-.dir{font-size:.95rem;letter-spacing:3px;color:#f0cc7a;background:rgba(0,0,0,.6);padding:2px 16px;border-radius:30px;border:1px solid #c9a86a80;margin-top:2px}
-.el{font-size:.7rem;letter-spacing:1px;color:#c8bea8;margin-top:1px;text-align:center;line-height:1.3}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风水罗盘 · 简易八卦二十四山</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
-.guaTag{
-  margin-top:5px;padding:5px 16px;border-radius:30px;
-  background:linear-gradient(180deg,rgba(201,168,106,.16),rgba(201,168,106,.05));
-  border:1px solid rgba(201,168,106,.45);
-  color:#f0d78c;font-size:.8rem;font-weight:600;letter-spacing:1px;
-  cursor:pointer;text-align:center;max-width:94vw;
-  box-shadow:0 6px 16px -6px #000;transition:all .15s;
-}
-.guaTag:active{transform:scale(.97)}
-.guaTag .sub{color:#a89e8a;font-size:.65rem;font-weight:400;letter-spacing:.5px;margin-left:6px}
+        body {
+            background: #1e1a17;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'Noto Serif SC', 'KaiTi', '楷体', serif;
+            padding: 20px;
+        }
 
-.btnRow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center}
-.btn{background:#2a2318;border:1px solid #c9a86a90;border-radius:60px;color:#f5ecdc;font-size:.8rem;padding:8px 18px;font-weight:600;letter-spacing:.5px;box-shadow:0 10px 20px -6px #000;transition:all .15s;cursor:pointer}
-.btn:active{transform:scale(.97)}
-.hd{display:none!important}
+        .container {
+            background: #2c241e;
+            padding: 20px 20px 30px;
+            border-radius: 50px 50px 30px 30px;
+            box-shadow: 
+                0 20px 30px rgba(0, 0, 0, 0.8),
+                inset 0 0 10px #5e4b3c;
+            border: 1px solid #b89b7b;
+        }
 
-.panelMask{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:100}
-.panelMask.show{opacity:1;pointer-events:auto}
-.panel{position:fixed;left:0;right:0;bottom:0;max-height:82vh;background:linear-gradient(180deg,#1a150a,#0d0a06);border-top:1px solid #c9a86a60;border-radius:22px 22px 0 0;box-shadow:0 -20px 40px -10px #000;transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.7,.3,1);z-index:101;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
-.panel.show{transform:translateY(0)}
-.panelHandle{width:40px;height:4px;background:#8a7a5a;border-radius:2px;margin:8px auto 4px;flex-shrink:0}
-.panelHead{padding:4px 18px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(201,168,106,.18);flex-shrink:0}
-.panelTitle{color:#f0d78c;font-size:1.05rem;font-weight:700;letter-spacing:2px}
-.panelClose{color:#a89e8a;font-size:1.2rem;background:transparent;border:none;cursor:pointer;padding:4px 8px;line-height:1}
+        canvas {
+            display: block;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            box-shadow: 
+                0 0 0 6px #3e2e20,
+                0 0 0 10px #9c7e5e,
+                0 0 30px 10px #00000080;
+            background: #f7f1e0; /* 宣纸底色 */
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
 
-.panelBody{overflow-y:auto;padding:10px 18px 22px;color:#d8cbb0;font-size:.8rem;line-height:1.55;-webkit-overflow-scrolling:touch}
-.section{margin-bottom:12px}
-.sectionTitle{color:#c9a86a;font-size:.72rem;letter-spacing:3px;font-weight:600;margin-bottom:5px;padding-bottom:2px;border-bottom:1px dashed rgba(201,168,106,.25)}
-.guaHeader{text-align:center;padding:6px 0 10px;border-bottom:1px solid rgba(201,168,106,.2);margin-bottom:10px}
-.guaHeaderName{font-size:1.4rem;font-weight:700;color:#f5e5a8;letter-spacing:4px;text-shadow:0 2px 10px #000}
-.guaHeaderSymbol{font-size:1.8rem;color:#c9a86a;margin-left:8px;vertical-align:middle}
-.guaHeaderMeta{font-size:.72rem;color:#a89e8a;letter-spacing:2px;margin-top:4px}
-.ciphr{font-size:.85rem;color:#f0e2b8;font-weight:600;letter-spacing:.5px;line-height:1.6}
-.expl{display:flex;flex-direction:column;gap:2px;margin-top:5px}
-.explRow{display:flex;gap:8px;font-size:.78rem;line-height:1.45}
-.explNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:22px}
-.explText{color:#c8bea8;flex:1}
-.xiang{font-style:italic;color:#c8bea8;font-size:.8rem;padding:7px 12px;border-left:2px solid #c9a86a80;background:rgba(201,168,106,.05);border-radius:0 6px 6px 0;line-height:1.55}
-.xiangBai{margin-top:5px;color:#a89e8a;font-size:.76rem;line-height:1.5;padding-left:12px;border-left:2px solid #5a4a3070}
-.tuan{font-style:italic;color:#d8cbb0;font-size:.79rem;padding:7px 12px;border-left:2px solid #8b1a1a80;background:rgba(139,26,26,.06);border-radius:0 6px 6px 0;line-height:1.6}
-.yaoRow{display:flex;gap:8px;font-size:.78rem;line-height:1.5;padding:4px 0;border-bottom:1px dotted rgba(201,168,106,.12)}
-.yaoRow:last-child{border-bottom:none}
-.yaoNo{color:#c9a86a;font-weight:600;flex-shrink:0;min-width:32px}
-.yaoText{color:#e6dcc4;flex:1}
-.tip{text-align:center;color:#8a7f68;font-size:.62rem;letter-spacing:1px;margin-top:8px}
+        canvas:active {
+            filter: brightness(1.1);
+        }
 
-.lookupIntro{color:#a89e8a;font-size:.72rem;text-align:center;letter-spacing:1px;padding:2px 0 10px}
-.lookupGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.lookupItem{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px;border-radius:8px;background:rgba(201,168,106,.06);border:1px solid rgba(201,168,106,.15)}
-.lookupItem .sym{font-size:1.15rem;color:#d8c08a;line-height:1}
-.lookupItem .nm{font-size:.6rem;color:#a89e8a;margin-top:2px;text-align:center;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.lookupItem .no{font-size:.52rem;color:#6a5f4a;margin-top:1px}
-</style>
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            color: #d9c8a9;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .controls button {
+            background: #4d3827;
+            border: none;
+            color: #f0e2ce;
+            font-size: 1rem;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-family: inherit;
+            font-weight: 600;
+            box-shadow: 0 4px 0 #1f140e, 0 6px 10px black;
+            cursor: pointer;
+            transition: all 0.06s linear;
+            letter-spacing: 1px;
+        }
+
+        .controls button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1f140e, 0 4px 8px black;
+        }
+
+        .angle-display {
+            font-size: 1.3rem;
+            background: #1e1612;
+            padding: 6px 24px;
+            border-radius: 40px;
+            border: 1px solid #a2805a;
+            box-shadow: inset 0 0 6px #2b1f17;
+            color: #eedbba;
+            font-variant-numeric: tabular-nums;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .hint {
+            margin-top: 16px;
+            color: #b8a690;
+            font-size: 0.85rem;
+            text-align: center;
+            letter-spacing: 1px;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-<div id="wrap">
-  <div class="title">· 罗 盘 ·</div>
-  <div id="cvWrap"><canvas id="cv"></canvas></div>
-  <div class="info">
-    <div class="deg" id="deg">0°</div>
-    <div class="dir" id="dir">坎 · 北</div>
-    <div class="el" id="el">子山 · 鼠 · 水（玄武）</div>
-  </div>
-  <div class="guaTag" id="guaTag">
-    <span id="guaTagName">坎为水</span>
-    <span class="sub" id="guaTagSub">· 水洊至</span>
-  </div>
-  <div class="btnRow">
-    <button class="btn" id="btnStart">🧭 启用指南针</button>
-    <button class="btn" id="btnLookup">📖 六十四卦</button>
-  </div>
+<div class="container">
+    <canvas id="luopanCanvas" width="600" height="600"></canvas>
+    <div class="controls">
+        <button id="resetBtn">归正</button>
+        <div class="angle-display" id="angleDisplay">0°</div>
+        <button id="rotateBtn">旋转</button>
+    </div>
+    <div class="hint">点击罗盘面 / 拖动指针 · 轻触旋转</div>
 </div>
-
-<div class="panelMask" id="panelMask"></div>
-<div class="panel" id="panel">
-  <div class="panelHandle"></div>
-  <div class="panelHead">
-    <div class="panelTitle" id="panelTitle">坎为水</div>
-    <button class="panelClose" id="panelClose">✕</button>
-  </div>
-  <div class="panelBody" id="panelBody"></div>
-</div>
-
-<div class="panelMask" id="lookupMask"></div>
-<div class="panel" id="lookupPanel">
-  <div class="panelHandle"></div>
-  <div class="panelHead">
-    <div class="panelTitle">六十四卦 · 卦序</div>
-    <button class="panelClose" id="lookupClose">✕</button>
-  </div>
-  <div class="panelBody">
-    <div class="lookupIntro">《周易》通行本卦序 · 上经三十 · 下经三十四</div>
-    <div class="lookupGrid" id="lookupGrid"></div>
-  </div>
-</div>
-
 <script>
-(function(){
-var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
-var cvWrap=document.getElementById('cvWrap');
-var degEl=document.getElementById('deg'),dirEl=document.getElementById('dir'),
-    elEl=document.getElementById('el');
-var guaTag=document.getElementById('guaTag'),guaTagName=document.getElementById('guaTagName'),
-    guaTagSub=document.getElementById('guaTagSub');
-var btnStart=document.getElementById('btnStart'),btnLookup=document.getElementById('btnLookup');
+    (function() {
+        const canvas = document.getElementById('luopanCanvas');
+        const ctx = canvas.getContext('2d');
+        const angleDisplay = document.getElementById('angleDisplay');
 
-var panelMask=document.getElementById('panelMask'),panel=document.getElementById('panel'),
-    panelTitle=document.getElementById('panelTitle'),panelBody=document.getElementById('panelBody'),
-    panelClose=document.getElementById('panelClose');
+        // 罗盘当前旋转角度 (0° 表示指针在正北/子山，罗盘本身不转，指针转)
+        // 我们用视觉表现：指针从圆心指向外，表示当前“朝向”.
+        // 为了符合风水习惯，0° = 正北(子)，顺时针增加.
+        let currentAngle = 0;          // 单位: 度  0°=子北, 顺时针增大
+        let isDragging = false;
+        let lastMouseAngle = 0;
 
-var lookupMask=document.getElementById('lookupMask'),lookupPanel=document.getElementById('lookupPanel'),
-    lookupClose=document.getElementById('lookupClose'),lookupGrid=document.getElementById('lookupGrid');
+        // 常量
+        const CENTER_X = 300;
+        const CENTER_Y = 300;
+        const OUTER_RADIUS = 280;      // 最外圈
+        const INNER_RADIUS = 40;       // 中心小圆
 
-var fHeading=0,active=false,listening=false,F=0.18;
-var DPR=Math.min(window.devicePixelRatio||2,3);
-var W=800,H=800,R=0;
+        // 八卦名称与符号 (后天八卦方位)
+        const BAGUA = [
+            { name: '坎', symbol: '☵', dir: '北', angle: 0 },      // 坎为水，正北
+            { name: '艮', symbol: '☶', dir: '东北', angle: 45 },
+            { name: '震', symbol: '☳', dir: '东', angle: 90 },
+            { name: '巽', symbol: '☴', dir: '东南', angle: 135 },
+            { name: '离', symbol: '☲', dir: '南', angle: 180 },
+            { name: '坤', symbol: '☷', dir: '西南', angle: 225 },
+            { name: '兑', symbol: '☱', dir: '西', angle: 270 },
+            { name: '乾', symbol: '☰', dir: '西北', angle: 315 }
+        ];
 
-var SHAN=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙',
-          '午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
-var GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-var SHENGXIAO=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
-var DIRS8=['北','东北','东','东南','南','西南','西','西北'];
-// 五行环（八方位）：北水、东北土、东木、东南木、南火、西南土、西金、西北金
-var WUXING8=['水','土','木','木','火','土','金','金'];
+        // 二十四山 (从正北子山开始，顺时针，每15度一山)
+        const MOUNTAINS_24 = [
+            '子', '癸', '丑', '艮', '寅', '甲', '卯', '乙', '辰', '巽', '巳', '丙',
+            '午', '丁', '未', '坤', '申', '庚', '酉', '辛', '戌', '乾', '亥', '壬'
+        ];
 
-var BAGUA=[
-  {s:'☵', name:'坎', angle:0, dir:'北',
-   gua:'坎为水', symbol:'䷜', no:29,
-   ciphr:'坎：习坎，有孚，维心亨，行有尚。',
-   expl:[['习坎','重重险难'],['有孚','心怀诚信'],['维心亨','内心通达'],['行有尚','行动可嘉尚']],
-   xiang:'水洊至，习坎；君子以常德行，习教事。',
-   xiangBai:'水流叠至，险难重重；君子应恒守德行，反复修习教化之事。',
-   tuan:'习坎，重险也。水流而不盈，行险而不失其信。维心亨，乃以刚中也。行有尚，往有功也。天险不可升也，地险山川丘陵也，王公设险以守其国，险之时用大矣哉！',
-   yao:[['初六','习坎，入于坎窞，凶'],['九二','坎有险，求小得'],
-        ['六三','来之坎坎，险且枕，入于坎窞，勿用'],
-        ['六四','樽酒簋贰，用缶，纳约自牖，终无咎'],
-        ['九五','坎不盈，祗既平，无咎'],
-        ['上六','系用徽纆，寘于丛棘，三岁不得，凶']]},
+        // 画背景底色 (宣纸纹理感通过轻微渐变模拟)
+        function drawBackground() {
+            // 径向渐变模拟宣纸中心亮边缘暗
+            const grad = ctx.createRadialGradient(280, 280, 100, 320, 320, 500);
+            grad.addColorStop(0, '#faf3e4');
+            grad.addColorStop(0.8, '#e8dbc4');
+            grad.addColorStop(1, '#cfbfa4');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, OUTER_RADIUS + 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
-  {s:'☶', name:'艮', angle:45, dir:'东北',
-   gua:'艮为山', symbol:'䷳', no:52,
-   ciphr:'艮：艮其背，不获其身；行其庭，不见其人，无咎。',
-   expl:[['艮其背','止于所不见'],['不获其身','忘我'],['行其庭','行于庭中'],['不见其人','不见外物']],
-   xiang:'兼山，艮；君子以思不出其位。',
-   xiangBai:'两山重叠，止而又止；君子应思虑不超出自己的本分与位置。',
-   tuan:'艮，止也。时止则止，时行则行，动静不失其时，其道光明。艮其止，止其所也。上下敌应，不相与也。是以不获其身，行其庭不见其人，无咎也。',
-   yao:[['初六','艮其趾，无咎，利永贞'],['六二','艮其腓，不拯其随，其心不快'],
-        ['九三','艮其限，列其夤，厉薰心'],['六四','艮其身，无咎'],
-        ['六五','艮其辅，言有序，悔亡'],['上九','敦艮，吉']]},
+        // 绘制多层同心圆（代表天池、内盘、外盘）
+        function drawRings() {
+            // 最外圈粗边
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, OUTER_RADIUS, 0, Math.PI * 2);
+            ctx.strokeStyle = '#5a3e2b';
+            ctx.lineWidth = 8;
+            ctx.stroke();
 
-  {s:'☳', name:'震', angle:90, dir:'东',
-   gua:'震为雷', symbol:'䷲', no:51,
-   ciphr:'震：亨。震来虩虩，笑言哑哑；震惊百里，不丧匕鬯。',
-   expl:[['亨','通达'],['虩虩','恐惧貌'],['哑哑','笑语声'],['匕鬯','祭器与香酒']],
-   xiang:'洊雷，震；君子以恐惧修省。',
-   xiangBai:'雷声接连而至，震动不息；君子应心怀敬畏，反省修身。',
-   tuan:'震，亨。震来虩虩，恐致福也。笑言哑哑，后有则也。震惊百里，惊远而惧迩也。出可以守宗庙社稷，以为祭主也。',
-   yao:[['初九','震来虩虩，后笑言哑哑，吉'],
-        ['六二','震来厉，亿丧贝，跻于九陵，勿逐，七日得'],
-        ['六三','震苏苏，震行无眚'],['九四','震遂泥'],
-        ['六五','震往来厉，亿无丧，有事'],
-        ['上六','震索索，视矍矍，征凶。震不于其躬，于其邻，无咎。婚媾有言']]},
+            // 第二圈 (细)
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, OUTER_RADIUS - 8, 0, Math.PI * 2);
+            ctx.strokeStyle = '#8b6f50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-  {s:'☴', name:'巽', angle:135, dir:'东南',
-   gua:'巽为风', symbol:'䷸', no:57,
-   ciphr:'巽：小亨，利有攸往，利见大人。',
-   expl:[['小亨','小有通达'],['利有攸往','宜有所往'],['利见大人','宜见大人']],
-   xiang:'随风，巽；君子以申命行事。',
-   xiangBai:'风随风而至，无所不入；君子应申明教令，推行政事。',
-   tuan:'重巽以申命。刚巽乎中正而志行。柔皆顺乎刚，是以小亨，利有攸往，利见大人。',
-   yao:[['初六','进退，利武人之贞'],['九二','巽在床下，用史巫纷若，吉无咎'],
-        ['九三','频巽，吝'],['六四','悔亡，田获三品'],
-        ['九五','贞吉悔亡，无不利。无初有终，先庚三日，后庚三日，吉'],
-        ['上九','巽在床下，丧其资斧，贞凶']]},
+            // 八卦外圈参考线 (半径255)
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 250, 0, Math.PI * 2);
+            ctx.strokeStyle = '#aa8b6a';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
 
-  {s:'☲', name:'离', angle:180, dir:'南',
-   gua:'离为火', symbol:'䷝', no:30,
-   ciphr:'离：利贞，亨。畜牝牛，吉。',
-   expl:[['利贞','利于守正'],['亨','通达'],['畜牝牛','养母牛（喻柔顺）']],
-   xiang:'明两作，离；大人以继明照于四方。',
-   xiangBai:'光明相继升起，离卦之象；大人应持续以光明照临天下四方。',
-   tuan:'离，丽也。日月丽乎天，百谷草木丽乎土，重明以丽乎正，乃化成天下。柔丽乎中正，故亨，是以畜牝牛吉也。',
-   yao:[['初九','履错然，敬之无咎'],['六二','黄离，元吉'],
-        ['九三','日昃之离，不鼓缶而歌，则大耋之嗟，凶'],
-        ['九四','突如其来如，焚如，死如，弃如'],
-        ['六五','出涕沱若，戚嗟若，吉'],
-        ['上九','王用出征，有嘉折首，获匪其丑，无咎']]},
+            // 二十四山分隔圈 (半径210)
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 210, 0, Math.PI * 2);
+            ctx.strokeStyle = '#b08e68';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-  {s:'☷', name:'坤', angle:225, dir:'西南',
-   gua:'坤为地', symbol:'䷁', no:2,
-   ciphr:'坤：元亨，利牝马之贞。君子有攸往，先迷后得主，利。',
-   expl:[['元亨','大通'],['牝马之贞','母马般的柔顺守正'],['先迷后得','先迷失后得主'],['利','有利']],
-   xiang:'地势坤，君子以厚德载物。',
-   xiangBai:'大地的气势宽厚和顺；君子应增厚美德，容载万物。',
-   tuan:'至哉坤元，万物资生，乃顺承天。坤厚载物，德合无疆。含弘光大，品物咸亨。牝马地类，行地无疆，柔顺利贞。君子攸行，先迷失道，后顺得常。西南得朋，乃与类行；东北丧朋，乃终有庆。安贞之吉，应地无疆。',
-   yao:[['初六','履霜，坚冰至'],['六二','直方大，不习无不利'],
-        ['六三','含章可贞。或从王事，无成有终'],
-        ['六四','括囊，无咎无誉'],['六五','黄裳，元吉'],
-        ['上六','龙战于野，其血玄黄']]},
+            // 内圈 (半径140) 用于放八卦符号
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 140, 0, Math.PI * 2);
+            ctx.strokeStyle = '#b08e68';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
 
-  {s:'☱', name:'兑', angle:270, dir:'西',
-   gua:'兑为泽', symbol:'䷹', no:58,
-   ciphr:'兑：亨，利贞。',
-   expl:[['亨','通达'],['利贞','利于守正']],
-   xiang:'丽泽，兑；君子以朋友讲习。',
-   xiangBai:'两泽相连，相互滋润；君子应与朋友相互讲习，共同进步。',
-   tuan:'兑，说也。刚中而柔外，说以利贞，是以顺乎天而应乎人。说以先民，民忘其劳；说以犯难，民忘其死；说之大，民劝矣哉！',
-   yao:[['初九','和兑，吉'],['九二','孚兑，吉，悔亡'],
-        ['六三','来兑，凶'],['九四','商兑未宁，介疾有喜'],
-        ['九五','孚于剥，有厉'],['上六','引兑']]},
+            // 天池小圆 (半径65)
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 65, 0, Math.PI * 2);
+            ctx.strokeStyle = '#6a4e34';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
 
-  {s:'☰', name:'乾', angle:315, dir:'西北',
-   gua:'乾为天', symbol:'䷀', no:1,
-   ciphr:'乾：元，亨，利，贞。',
-   expl:[['元','元始、开端'],['亨','通达'],['利','和合相宜'],['贞','守正固持']],
-   xiang:'天行健，君子以自强不息。',
-   xiangBai:'天道运行刚健永不停息；君子应效法天道，奋发自立，永不止歇。',
-   tuan:'大哉乾元，万物资始，乃统天。云行雨施，品物流形。大明终始，六位时成，时乘六龙以御天。乾道变化，各正性命，保合太和，乃利贞。首出庶物，万国咸宁。',
-   yao:[['初九','潜龙勿用'],['九二','见龙在田，利见大人'],
-        ['九三','君子终日乾乾，夕惕若厉，无咎'],
-        ['九四','或跃在渊，无咎'],
-        ['九五','飞龙在天，利见大人'],
-        ['上九','亢龙有悔']]}
-];
+            // 中心太极区域参考小圆 (半径40)
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 40, 0, Math.PI * 2);
+            ctx.strokeStyle = '#8b6f50';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+        }
 
-var GUA64_LIST = [
-  ['䷀','乾为天'],['䷁','坤为地'],['䷂','水雷屯'],['䷃','山水蒙'],
-  ['䷄','水天需'],['䷅','天水讼'],['䷆','地水师'],['䷇','水地比'],
-  ['䷈','风天小畜'],['䷉','天泽履'],['䷊','地天泰'],['䷋','天地否'],
-  ['䷌','天火同人'],['䷍','火天大有'],['䷎','地山谦'],['䷏','雷地豫'],
-  ['䷐','泽雷随'],['䷑','山风蛊'],['䷒','地泽临'],['䷓','风地观'],
-  ['䷔','火雷噬嗑'],['䷕','山火贲'],['䷖','山地剥'],['䷗','地雷复'],
-  ['䷘','天雷无妄'],['䷙','山天大畜'],['䷚','山雷颐'],['䷛','泽风大过'],
-  ['䷜','坎为水'],['䷝','离为火'],['䷞','泽山咸'],['䷟','雷风恒'],
-  ['䷠','天山遁'],['䷡','雷天大壮'],['䷢','火地晋'],['䷣','地火明夷'],
-  ['䷤','风火家人'],['䷥','火泽睽'],['䷦','水山蹇'],['䷧','雷水解'],
-  ['䷨','山泽损'],['䷩','风雷益'],['䷪','泽天夬'],['䷫','天风姤'],
-  ['䷬','泽地萃'],['䷭','地风升'],['䷮','泽水困'],['䷯','水风井'],
-  ['䷰','泽火革'],['䷱','火风鼎'],['䷲','震为雷'],['䷳','艮为山'],
-  ['䷴','风山渐'],['䷵','雷泽归妹'],['䷶','雷火丰'],['䷷','火山旅'],
-  ['䷸','巽为风'],['䷹','兑为泽'],['䷺','风水涣'],['䷻','水泽节'],
-  ['䷼','风泽中孚'],['䷽','雷山小过'],['䷾','水火既济'],['䷿','火水未济']
-];
+        // 绘制二十四山文字 (沿圆周排列，每15度一个，文字径向朝外)
+        function draw24Mountains() {
+            const radiusText = 178; // 文字半径 (位于210环内侧一点)
+            ctx.font = 'bold 18px "Noto Serif SC", "KaiTi", "楷体", "Microsoft YaHei", serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#2e241b';
 
-var GUA64_BY_PALACE = [
-  ['䷜','䷻','䷂','䷃','䷄','䷅','䷆','䷇'],
-  ['䷳','䷙','䷚','䷛','䷠','䷡','䷒','䷓'],
-  ['䷲','䷔','䷕','䷖','䷗','䷘','䷚','䷛'],
-  ['䷸','䷈','䷉','䷊','䷋','䷌','䷍','䷎'],
-  ['䷝','䷰','䷱','䷶','䷷','䷵','䷞','䷟'],
-  ['䷁','䷗','䷒','䷊','䷓','䷋','䷭','䷮'],
-  ['䷹','䷪','䷫','䷬','䷭','䷮','䷯','䷰'],
-  ['䷀','䷫','䷠','䷡','䷪','䷱','䷲','䷳']
-];
+            // 让文字方向径向朝外：旋转坐标系使文字底部指向圆心 (或者可以径向朝外)
+            // 但通常罗盘的字是底部指向圆心或顶部指向圆心？为了易读，让字头朝外（即字底朝圆心），
+            // 这样从外面读是正的，但需要每个字旋转角度+90°? 更清晰的方式：让文字沿切线方向？ 
+            // 传统风水罗盘二十四山文字是径向排列，字头朝向圆心或朝外。这里为了美观且可读，
+            // 采用字头朝外，即每个字旋转 (angle-90) 度? 若角度0°在正北，我们希望“子”字是竖直的。
+            // 通常正北的字底部朝圆心？不，为了从上方看字正，应该在正北处字顶部朝上（即不旋转）。
+            // 如果按角度旋转，会倾斜。干脆都保持正立？但那样不传统。 
+            // 改用传统方式：文字方向径向朝外，即旋转角度 = 角度(弧度) - 90°? 测试。
+            // 简单实现：所有文字不旋转，每个字都水平——这样虽然不传统但绝对清晰易读。
+            // 但风水罗盘通常是字头朝向圆心（便于从外圈读）。权衡后，为了让用户容易辨认，采用水平文字，
+            // 但紧密排列，可能会重叠？24个字每个15度，半径178，弧长 ≈ 178*0.2618≈46.6px，足够。
+            // 而水平放置不会重叠。好看且易读。
+            // 我决定：全部水平绘制！更符合现代UI，不丢失信息。
+            
+            for (let i = 0; i < 24; i++) {
+                // 角度：从正北(0°)开始，顺时针
+                const angleDeg = i * 15; 
+                const angleRad = (angleDeg - 90) * Math.PI / 180; // 转换为canvas坐标(0°在三点钟方向，我们调整-90°使0°在正上方)
+                // 注意：风水罗盘正北是0°，顺时针，canvas的0°在三点钟，所以-90°使0°指向正上方（北）
+                const x = CENTER_X + radiusText * Math.cos(angleRad);
+                const y = CENTER_Y + radiusText * Math.sin(angleRad);
+                
+                // 文字颜色微调：四维八干十二支可略不同？保持统一深褐色
+                ctx.fillStyle = '#3d2e20';
+                // 如果是四维(乾坤艮巽)用深红
+                const mountain = MOUNTAINS_24[i];
+                if (mountain === '乾' || mountain === '坤' || mountain === '艮' || mountain === '巽') {
+                    ctx.fillStyle = '#8b3a3a'; // 暗红
+                } else if ('子午卯酉'.includes(mountain)) {
+                    ctx.fillStyle = '#2c4a2c'; // 墨绿
+                }
+                
+                ctx.font = 'bold 20px "Noto Serif SC", "KaiTi", "楷体", "Microsoft YaHei", serif';
+                ctx.fillText(mountain, x, y);
+            }
+        }
 
-var XING=['角','亢','氐','房','心','尾','箕','斗','牛','女','虚','危','室','壁',
-          '奎','娄','胃','昴','毕','觜','参','井','鬼','柳','星','张','翼','轸'];
+        // 绘制八卦符号以及卦名(小字) —— 位于内圈
+        function drawBagua() {
+            const radiusSymbol = 88;    // 符号半径
+            const radiusName = 125;     // 卦名半径
 
-function getInfo(d){
-  d=((d%360)+360)%360;
-  var palaceIdx = Math.floor(((d+22.5)%360)/45);
-  var palace = BAGUA[palaceIdx];
-  var shanIdx = Math.floor(((d+7.5)%360)/15);
-  var shan = SHAN[shanIdx];
-  var sxIdx = Math.floor(((d+15)%360)/30);
-  var sx = SHENGXIAO[sxIdx];
-  var wuxingArr = [
-    {wx:'水', sx:'玄武'},{wx:'土', sx:'螣蛇'},{wx:'木', sx:'青龙'},{wx:'木', sx:'青龙'},
-    {wx:'土', sx:'勾陈'},{wx:'火', sx:'朱雀'},{wx:'火', sx:'朱雀'},{wx:'土', sx:'勾陈'},
-    {wx:'金', sx:'白虎'},{wx:'金', sx:'白虎'},{wx:'土', sx:'螣蛇'},{wx:'水', sx:'玄武'}
-  ];
-  var w = wuxingArr[sxIdx];
-  return {palace:palace, shan:shan, sx:sx, wx:w.wx, beast:w.sx, palaceIdx:palaceIdx};
-}
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
 
-function resizeCanvas(){
-  var maxW = window.innerWidth - 2;
-  var reservedH = 230;
-  var maxH = window.innerHeight - reservedH;
-  var size = Math.min(maxW, maxH);
-  if(size < 200) size = 200;
-  W = size; H = size;
-  cv.width = W * DPR; cv.height = H * DPR;
-  cv.style.width = W + 'px'; cv.style.height = H + 'px';
-  cvWrap.style.width = W + 'px'; cvWrap.style.height = H + 'px';
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(DPR,DPR);
-  R = Math.min(W,H) * 0.47;
-}
+            BAGUA.forEach((gua, index) => {
+                // 角度: 后天八卦方位，坎北0°，艮东北45°...
+                const angleDeg = gua.angle;
+                const angleRad = (angleDeg - 90) * Math.PI / 180; // 转换为canvas
 
-function ringText(cx,cy,r,texts,font,color,startAng,radial){
-  ctx.save();ctx.translate(cx,cy);
-  ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillStyle=color;
-  var n=texts.length,step=360/n;
-  for(var i=0;i<n;i++){
-    var a=((startAng+i*step)*Math.PI)/180;
-    ctx.save();ctx.rotate(a);
-    if(radial)ctx.rotate(Math.PI/2);
-    ctx.translate(0,-r);
-    ctx.fillText(texts[i],0,0);
-    ctx.restore();
-  }
-  ctx.restore();
-}
+                // 绘制卦象符号 (大号)
+                const sx = CENTER_X + radiusSymbol * Math.cos(angleRad);
+                const sy = CENTER_Y + radiusSymbol * Math.sin(angleRad);
+                ctx.font = '34px "Segoe UI Symbol", "Noto Sans Symbols", "Arial Unicode MS", sans-serif';
+                ctx.fillStyle = '#1f1a15';
+                ctx.fillText(gua.symbol, sx, sy);
 
-// 八方位（跟随罗盘旋转）
-function drawDirs8(cx,cy,r,headingDeg){
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.rotate(-headingDeg * Math.PI / 180);
-  ctx.font = 'bold ' + (r * 0.20) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  for(var i=0;i<8;i++){
-    var a = (i*45) * Math.PI/180;
-    var x = Math.sin(a) * r;
-    var y = -Math.cos(a) * r;
-    ctx.fillStyle = (i===0) ? '#8b1a1a' : '#5a3010';
-    ctx.fillText(DIRS8[i], x, y);
-  }
-  ctx.restore();
-}
+                // 绘制卦名 (小字)
+                const nx = CENTER_X + radiusName * Math.cos(angleRad);
+                const ny = CENTER_Y + radiusName * Math.sin(angleRad);
+                ctx.font = 'bold 16px "Noto Serif SC", "KaiTi", "楷体", serif';
+                ctx.fillStyle = '#6b4f33';
+                ctx.fillText(gua.name, nx, ny);
+            });
+        }
 
-// 五行环（跟随罗盘旋转）
-function drawWuxing8(cx,cy,r,headingDeg){
-  var colors = {'水':'#1a4a8b','火':'#8b1a1a','木':'#1a5a2a','金':'#8b6a1a','土':'#7a3a10'};
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.rotate(-headingDeg * Math.PI / 180);
-  ctx.font = 'bold ' + (r * 0.20) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  for(var i=0;i<8;i++){
-    var a = (i*45) * Math.PI/180;
-    var x = Math.sin(a) * r;
-    var y = -Math.cos(a) * r;
-    ctx.fillStyle = colors[WUXING8[i]] || '#3a2a10';
-    ctx.fillText(WUXING8[i], x, y);
-  }
-  ctx.restore();
-}
+        // 绘制中心太极图（简化版，阴阳鱼）
+        function drawTaiji() {
+            const taijiRadius = 38;
+            ctx.save();
+            ctx.translate(CENTER_X, CENTER_Y);
+            
+            // 白底圆
+            ctx.beginPath();
+            ctx.arc(0, 0, taijiRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5ede1';
+            ctx.fill();
+            ctx.strokeStyle = '#5f4a34';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
 
-function drawGua64(cx,cy,r,font,color){
-  ctx.save();ctx.translate(cx,cy);
-  ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillStyle=color;
-  for(var p=0;p<8;p++){
-    var startAngle = BAGUA[p].angle - 22.5;
-    var step = 45 / 8;
-    for(var k=0;k<8;k++){
-      var a = (startAngle + step*k + step/2) * Math.PI / 180;
-      ctx.save();ctx.rotate(a);
-      ctx.translate(0,-r);
-      ctx.fillText(GUA64_BY_PALACE[p][k],0,0);
-      ctx.restore();
-    }
-  }
-  ctx.restore();
-}
+            // 黑色半圆 (阴鱼)
+            ctx.beginPath();
+            ctx.arc(0, 0, taijiRadius, -Math.PI / 2, Math.PI / 2, false);
+            ctx.fillStyle = '#1e1a17';
+            ctx.fill();
 
-function drawBagua(cx,cy,r,font,color){
-  ctx.save();ctx.translate(cx,cy);
-  ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillStyle=color;
-  for(var i=0;i<BAGUA.length;i++){
-    var a = BAGUA[i].angle * Math.PI / 180;
-    ctx.save();ctx.rotate(a);
-    ctx.translate(0,-r);
-    ctx.fillText(BAGUA[i].s,0,0);
-    ctx.restore();
-  }
-  ctx.restore();
-}
+            // 画两个小圆 (鱼眼)
+            // 上半部小圆(阴鱼眼，白色)
+            ctx.beginPath();
+            ctx.arc(0, -taijiRadius / 2, taijiRadius / 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5ede1';
+            ctx.fill();
+            // 下半部小圆(阳鱼眼，黑色)
+            ctx.beginPath();
+            ctx.arc(0, taijiRadius / 2, taijiRadius / 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#1e1a17';
+            ctx.fill();
 
-function drawTaiji(cx,cy,r){
-  ctx.save();ctx.translate(cx,cy);
-  ctx.beginPath();ctx.arc(0,0,r,-Math.PI/2,Math.PI/2);ctx.fillStyle='#f5ecd8';ctx.fill();
-  ctx.beginPath();ctx.arc(0,0,r,Math.PI/2,-Math.PI/2);ctx.fillStyle='#1a1a1a';ctx.fill();
-  ctx.beginPath();ctx.arc(0,-r/2,r/2,0,Math.PI*2);ctx.fillStyle='#1a1a1a';ctx.fill();
-  ctx.beginPath();ctx.arc(0,r/2,r/2,0,Math.PI*2);ctx.fillStyle='#f5ecd8';ctx.fill();
-  ctx.beginPath();ctx.arc(0,-r/2,r/6,0,Math.PI*2);ctx.fillStyle='#f5ecd8';ctx.fill();
-  ctx.beginPath();ctx.arc(0,r/2,r/6,0,Math.PI*2);ctx.fillStyle='#1a1a1a';ctx.fill();
-  ctx.restore();
-}
+            // 外圈装饰
+            ctx.beginPath();
+            ctx.arc(0, 0, taijiRadius + 4, 0, Math.PI * 2);
+            ctx.strokeStyle = '#b99f82';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
 
-function draw(h){
-  var cx=W/2, cy=H/2;
-  ctx.clearRect(0,0,W,H);
+            ctx.restore();
+        }
 
-  ctx.beginPath();ctx.arc(cx,cy,R*1.02,0,Math.PI*2);ctx.fillStyle='#1a150a';ctx.fill();
+        // 绘制指针 (磁针/天池指针) 根据 currentAngle 旋转
+        function drawNeedle() {
+            const needleLength = 200;   // 指针长度 (从中心向外)
+            const needleWidth = 10;     // 指针宽度 (中心处)
+            
+            ctx.save();
+            ctx.translate(CENTER_X, CENTER_Y);
+            // 指针角度：0°指向正北(上方)，因此从-90°开始旋转 currentAngle
+            // canvas坐标：0°指向右侧，所以我们让指针初始指向正上方为0°
+            // 但我们的 currentAngle 是0°=北，所以旋转 currentAngle 度即可 (因为-90°+ currentAngle)
+            const rad = (currentAngle - 90) * Math.PI / 180; // 使0°指向正上
+            
+            ctx.rotate(rad + Math.PI / 2); // 微调: 需要指针从中心指向北，我们旋转使得指针顶部方向为北
+            // 实际上我们把坐标系旋转到指针方向。先让指针默认指向正右(0°)，然后旋转。
+            // 我们希望指针方向 = currentAngle(北偏东顺时针)。 canvas 中0°是正右，我们要转换。
+            // 更简单: 旋转 (currentAngle - 90) 度？ 试一下。
+            // 重写：使用绝对坐标画指针，不旋转坐标系，直接计算终点。这样更容易控制。
+            ctx.restore(); // 恢复，改用数学计算
 
-  var bg=ctx.createRadialGradient(cx,cy,R*.2,cx,cy,R*1.02);
-  bg.addColorStop(0,'#fdf3d8');bg.addColorStop(.7,'#eeda9e');bg.addColorStop(1,'#c9a86a');
-  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
-  ctx.strokeStyle='#8b6f3a';ctx.lineWidth=3;ctx.stroke();
+            // 改用纯数学计算指针终点，不再旋转坐标系
+            const radPointer = (currentAngle - 90) * Math.PI / 180; // 0°→-90° 指向正北
+            const startX = CENTER_X;
+            const startY = CENTER_Y;
+            const endX = CENTER_X + needleLength * Math.cos(radPointer);
+            const endY = CENTER_Y + needleLength * Math.sin(radPointer);
+            
+            // 指针尾部（反向小段，表示磁针南极? 风水指针通常一头指向南，我们简化为一根指向当前方位的针）
+            // 但为了美观，画一个菱形指针：从中心到外。
+            // 绘制指针主体 (带渐变)
+            ctx.beginPath();
+            // 计算垂直方向偏移向量 (用于画菱形)
+            const perpRad = radPointer + Math.PI / 2;
+            const perpX = Math.cos(perpRad) * 5;
+            const perpY = Math.sin(perpRad) * 5;
+            
+            // 菱形四个点: 中心两侧偏移，终点一个尖
+            ctx.moveTo(CENTER_X + perpX, CENTER_Y + perpY); // 下侧偏移
+            ctx.lineTo(endX, endY); // 指针尖
+            ctx.lineTo(CENTER_X - perpX, CENTER_Y - perpY); // 上侧偏移
+            ctx.closePath();
+            
+            // 红色指针 (传统磁针红色指南)
+            ctx.fillStyle = '#c43b2b';
+            ctx.shadowColor = '#6b1e1e';
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.shadowColor = 'transparent'; // 重置阴影
+            
+            // 指针中心圆点装饰
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#b8863d';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#4a2e18';
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+            
+            // 指针尖上加一个小圆点
+            ctx.beginPath();
+            ctx.arc(endX, endY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#f5d742';
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = '#c99a2e';
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
 
-  ctx.beginPath();ctx.arc(cx,cy,R*.98,0,Math.PI*2);ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,R*.95,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
+            // 再画一根短的反向针(黑色,表示南)
+            const backEndX = CENTER_X - 70 * Math.cos(radPointer);
+            const backEndY = CENTER_Y - 70 * Math.sin(radPointer);
+            ctx.beginPath();
+            ctx.moveTo(CENTER_X + perpX * 0.7, CENTER_Y + perpY * 0.7);
+            ctx.lineTo(backEndX, backEndY);
+            ctx.lineTo(CENTER_X - perpX * 0.7, CENTER_Y - perpY * 0.7);
+            ctx.closePath();
+            ctx.fillStyle = '#2f2a24';
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#1a1310';
+            ctx.fill();
+            ctx.shadowColor = 'transparent';
+        }
 
-  // === 固定层（不随罗盘转） ===
-  drawGua64(cx,cy,R*.92,R*.028+'px sans-serif','#3a2a10');
-  ringText(cx,cy,R*.86,XING,R*.030+'px "PingFang SC","Microsoft YaHei",sans-serif','#4a3520',0,false);
-  ringText(cx,cy,R*.80,SHAN,'bold '+R*.046+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
-  ringText(cx,cy,R*.735,SHENGXIAO,'bold '+R*.050+'px "PingFang SC","Microsoft YaHei",sans-serif','#8b1a1a',0,false);
-  ringText(cx,cy,R*.675,GAN.concat(['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']),R*.036+'px "PingFang SC","Microsoft YaHei",sans-serif','#1a1a1a',0,false);
-  drawBagua(cx,cy,R*.605,R*.080+'px "Segoe UI Symbol",sans-serif','#8b1a1a');
+        // 绘制外圈刻度线 (每15度一根短线，代表二十四山分界)
+        function drawTickMarks() {
+            const outerTickRadius = 245;   // 刻度外半径
+            const innerTickRadius = 225;   // 刻度内半径
+            
+            ctx.save();
+            ctx.strokeStyle = '#876e52';
+            ctx.lineWidth = 1.8;
+            
+            for (let i = 0; i < 24; i++) {
+                const angleDeg = i * 15;
+                const angleRad = (angleDeg - 90) * Math.PI / 180;
+                
+                const x1 = CENTER_X + innerTickRadius * Math.cos(angleRad);
+                const y1 = CENTER_Y + innerTickRadius * Math.sin(angleRad);
+                const x2 = CENTER_X + outerTickRadius * Math.cos(angleRad);
+                const y2 = CENTER_Y + outerTickRadius * Math.sin(angleRad);
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
 
-  // 刻度
-  ctx.save();ctx.translate(cx,cy);
-  for(var i=0;i<360;i+=5){
-    var rad=i*Math.PI/180;
-    var isMajor=i%30===0, isCard=i%90===0;
-    var outR=R*.56, inR=isMajor?(isCard?R*.49:R*.51):R*.53;
-    ctx.beginPath();
-    ctx.moveTo(Math.sin(rad)*outR,-Math.cos(rad)*outR);
-    ctx.lineTo(Math.sin(rad)*inR,-Math.cos(rad)*inR);
-    ctx.strokeStyle=isCard?'#8b1a1a':(isMajor?'#1a1a1a':'#5a4a30');
-    ctx.lineWidth=isCard?2.5:(isMajor?1.8:1);
-    ctx.stroke();
-  }
-  ctx.restore();
+        // 绘制所有内容
+        function drawLuopan() {
+            ctx.clearRect(0, 0, 600, 600);
+            
+            // 背景底色
+            drawBackground();
+            
+            // 同心圆
+            drawRings();
+            
+            // 刻度线
+            drawTickMarks();
+            
+            // 二十四山文字
+            draw24Mountains();
+            
+            // 八卦符号 + 卦名
+            drawBagua();
+            
+            // 太极图
+            drawTaiji();
+            
+            // 指针 (根据currentAngle)
+            drawNeedle();
+            
+            // 中心极小的装饰圈
+            ctx.beginPath();
+            ctx.arc(CENTER_X, CENTER_Y, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#b99a6b';
+            ctx.fill();
+        }
 
-  // 中心白底
-  ctx.beginPath();ctx.arc(cx,cy,R*.44,0,Math.PI*2);ctx.fillStyle='#fbf3e0';ctx.fill();
-  ctx.strokeStyle='#8b6f3a';ctx.lineWidth=2;ctx.stroke();
-  ctx.beginPath();ctx.arc(cx,cy,R*.42,0,Math.PI*2);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1;ctx.stroke();
+        // 更新角度显示
+        function updateAngleDisplay() {
+            const displayAngle = ((currentAngle % 360) + 360) % 360; // 0~359
+            angleDisplay.textContent = Math.round(displayAngle) + '°';
+        }
 
-  // === 跟随罗盘旋转的层 ===
-  drawDirs8(cx,cy,R*.375,h);       // 内圈八方位
-  drawWuxing8(cx,cy,R*.485,h);     // 五行环（在八方位外、刻度内）
+        // 设置角度并重绘
+        function setAngle(deg) {
+            currentAngle = deg;
+            updateAngleDisplay();
+            drawLuopan();
+        }
 
-  // 太极
-  drawTaiji(cx,cy,R*.26);
+        // 从鼠标/触摸位置计算角度 (0°=正北, 顺时针)
+        function getAngleFromEvent(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;   // canvas物理像素比
+            const scaleY = canvas.height / rect.height;
 
-  // 十字线（跟随罗盘旋转）
-  ctx.save();ctx.translate(cx,cy);ctx.rotate(-h*Math.PI/180);
-  ctx.beginPath();ctx.moveTo(-R*.26,0);ctx.lineTo(R*.26,0);
-  ctx.moveTo(0,-R*.26);ctx.lineTo(0,R*.26);
-  ctx.strokeStyle='#8b1a1a';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.restore();
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
 
-  // 指针（固定指向正上方，代表设备朝向）
-  ctx.save();ctx.translate(cx,cy);
-  var pl=R*.34,pw=R*.030;
-  ctx.beginPath();ctx.moveTo(0,-pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,pw);ctx.lineTo(-pw*3,0);ctx.closePath();
-  ctx.fillStyle='#c81e1e';ctx.shadowColor='#ff000080';ctx.shadowBlur=10;ctx.fill();
-  ctx.beginPath();ctx.moveTo(0,pl);ctx.lineTo(pw*3,0);ctx.lineTo(0,-pw);ctx.lineTo(-pw*3,0);ctx.closePath();
-  ctx.fillStyle='#f5f5f5';ctx.shadowColor='#ffffff60';ctx.shadowBlur=8;ctx.fill();
-  ctx.beginPath();ctx.arc(0,0,R*.022,0,Math.PI*2);ctx.fillStyle='#c9a86a';ctx.shadowBlur=8;ctx.fill();
-  ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.restore();
+            // 相对于canvas CSS坐标
+            const canvasX = (clientX - rect.left) * scaleX;
+            const canvasY = (clientY - rect.top) * scaleY;
 
-  // 外圈红十字（固定装饰）
-  ctx.save();ctx.translate(cx,cy);
-  ctx.beginPath();
-  ctx.moveTo(-R*.98,0);ctx.lineTo(-R*.52,0);
-  ctx.moveTo(R*.52,0);ctx.lineTo(R*.98,0);
-  ctx.moveTo(0,-R*.98);ctx.lineTo(0,-R*.52);
-  ctx.moveTo(0,R*.52);ctx.lineTo(0,R*.98);
-  ctx.strokeStyle='#8b1a1a70';ctx.lineWidth=1;ctx.stroke();
-  ctx.restore();
-}
+            const dx = canvasX - CENTER_X;
+            const dy = canvasY - CENTER_Y;
+            
+            // 计算角度: 从正北(0, -1) 顺时针
+            let angleRad = Math.atan2(dy, dx);  // 返回 -PI 到 PI, 0指向右
+            // 转换为以正北为0°, 顺时针
+            let angleDeg = (angleRad * 180 / Math.PI + 90 + 360) % 360; // 加90因为atan2(0,-1)是-PI/2, 要转到正北
+            // 实际上：期望当dx=0, dy=-1 (正北) 时，angleDeg=0。
+            // 使用atan2(dy, dx) 返回 -PI/2 对于正北。 所以 (angleRad * 180/PI) 得到 -90。
+            // 加上90 -> 0°, 完美。
+            
+            return angleDeg;
+        }
 
-var lastPalaceIdx = -1;
+        // 重置到正北
+        function resetToNorth() {
+            setAngle(0);
+        }
 
-function renderTag(palaceIdx){
-  var p = BAGUA[palaceIdx];
-  guaTagName.textContent = p.gua;
-  var firstPhrase = p.xiang.split(/[，。；]/)[0];
-  guaTagSub.textContent = '· ' + firstPhrase;
-}
+        // 随机旋转
+        function rotateRandom() {
+            const randomDeg = Math.floor(Math.random() * 360);
+            setAngle(randomDeg);
+        }
 
-function renderPanel(palaceIdx){
-  var p = BAGUA[palaceIdx];
-  panelTitle.textContent = p.gua;
-  var html = '';
-  html += '<div class="guaHeader">';
-  html += '<div class="guaHeaderName">' + p.gua + '<span class="guaHeaderSymbol">' + p.symbol + '</span></div>';
-  html += '<div class="guaHeaderMeta">《周易》第' + p.no + '卦 · ' + p.dir + '</div>';
-  html += '</div>';
-  html += '<div class="section"><div class="sectionTitle">象 传</div>';
-  html += '<div class="xiang">' + p.xiang + '</div>';
-  html += '<div class="xiangBai">' + p.xiangBai + '</div></div>';
-  html += '<div class="section"><div class="sectionTitle">彖 传</div>';
-  html += '<div class="tuan">' + p.tuan + '</div></div>';
-  html += '<div class="section"><div class="sectionTitle">卦 辞</div>';
-  html += '<div class="ciphr">' + p.ciphr + '</div>';
-  html += '<div class="expl">';
-  for(var i=0;i<p.expl.length;i++){
-    html += '<div class="explRow"><span class="explNo">' + p.expl[i][0] + '</span>' +
-            '<span class="explText">' + p.expl[i][1] + '</span></div>';
-  }
-  html += '</div></div>';
-  html += '<div class="section"><div class="sectionTitle">六 爻（由下往上）</div>';
-  for(var j=0;j<p.yao.length;j++){
-    html += '<div class="yaoRow"><span class="yaoNo">' + p.yao[j][0] + '</span>' +
-            '<span class="yaoText">' + p.yao[j][1] + '</span></div>';
-  }
-  html += '</div>';
-  html += '<div class="tip">— 点击空白处或 ✕ 收起 —</div>';
-  panelBody.innerHTML = html;
-}
+        // 事件监听
+        function initEvents() {
+            // 鼠标拖动
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                const angle = getAngleFromEvent(e);
+                lastMouseAngle = angle;
+                setAngle(angle); // 点击即转到该角度，更直观
+                e.preventDefault();
+            });
 
-function openPanel(){panel.classList.add('show');panelMask.classList.add('show');}
-function closePanel(){panel.classList.remove('show');panelMask.classList.remove('show');}
-function openLookup(){lookupPanel.classList.add('show');lookupMask.classList.add('show');}
-function closeLookup(){lookupPanel.classList.remove('show');lookupMask.classList.remove('show');}
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const angle = getAngleFromEvent(e);
+                // 为了平滑，直接设置角度跟随鼠标
+                setAngle(angle);
+                e.preventDefault();
+            });
 
-function renderLookup(){
-  var html = '';
-  for(var i=0;i<GUA64_LIST.length;i++){
-    html += '<div class="lookupItem">';
-    html += '<div class="sym">' + GUA64_LIST[i][0] + '</div>';
-    html += '<div class="nm">' + GUA64_LIST[i][1] + '</div>';
-    html += '<div class="no">第' + (i+1) + '卦</div>';
-    html += '</div>';
-  }
-  lookupGrid.innerHTML = html;
-}
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
 
-function update(d){
-  var n=((d%360)+360)%360;
-  var info = getInfo(n);
-  degEl.textContent = Math.round(n)+'°';
-  dirEl.textContent = info.palace.name + ' · ' + info.palace.dir;
-  elEl.textContent  = info.shan + '山 · ' + info.sx + ' · ' + info.wx + '（' + info.beast + '）';
-  if(info.palaceIdx !== lastPalaceIdx){
-    lastPalaceIdx = info.palaceIdx;
-    renderTag(info.palaceIdx);
-    renderPanel(info.palaceIdx);
-  }
-  draw(n);
-}
+            canvas.addEventListener('mouseleave', () => {
+                isDragging = false;
+            });
 
-guaTag.addEventListener('click', function(){
-  if(panel.classList.contains('show')) closePanel();
-  else openPanel();
-});
-panelMask.addEventListener('click', closePanel);
-panelClose.addEventListener('click', closePanel);
+            // 触摸事件
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const angle = getAngleFromEvent(e);
+                lastMouseAngle = angle;
+                setAngle(angle);
+                isDragging = true;
+            }, { passive: false });
 
-btnLookup.addEventListener('click', openLookup);
-lookupMask.addEventListener('click', closeLookup);
-lookupClose.addEventListener('click', closeLookup);
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDragging) return;
+                const angle = getAngleFromEvent(e);
+                setAngle(angle);
+            }, { passive: false });
 
-function onOri(e){
-  var hh=null;
-  if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){hh=e.webkitCompassHeading;}
-  else if(e.alpha!==undefined&&e.alpha!==null){hh=(360-e.alpha)%360;}
-  if(hh===null||isNaN(hh)){return;}
-  if(!active){fHeading=hh;active=true;}
-  else{var diff=hh-fHeading;if(diff>180)diff-=360;if(diff<-180)diff+=360;fHeading=(fHeading+F*diff+360)%360;}
-  update(fHeading);
-}
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDragging = false;
+            });
 
-function start(){
-  if(listening)return;
-  if(window.DeviceOrientationEvent){
-    window.addEventListener('deviceorientation',onOri,true);
-    listening=true;btnStart.classList.add('hd');
-  }else{
-    btnStart.textContent='不支持传感器';
-    btnStart.disabled=true;btnStart.style.opacity='.6';
-    update(0);return;
-  }
-}
+            canvas.addEventListener('touchcancel', (e) => {
+                isDragging = false;
+            });
 
-function ask(){
-  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission().then(function(s){
-      if(s==='granted'){start();}
-      else{btnStart.textContent='重新请求权限';}
-    }).catch(function(){});
-  }else{start();}
-}
+            // 按钮
+            document.getElementById('resetBtn').addEventListener('click', resetToNorth);
+            document.getElementById('rotateBtn').addEventListener('click', rotateRandom);
+        }
 
-function init(){
-  resizeCanvas();
-  update(0);
-  renderLookup();
-  if(!window.DeviceOrientationEvent){
-    btnStart.textContent='不支持传感器';
-    btnStart.disabled=true;btnStart.style.opacity='.6';
-  }else{btnStart.addEventListener('click',ask);}
-  window.addEventListener('resize',function(){resizeCanvas();update(fHeading);});
-  window.addEventListener('orientationchange',function(){setTimeout(function(){resizeCanvas();update(fHeading);},300);});
-}
-window.addEventListener('load',init);
-document.addEventListener('visibilitychange',function(){if(!document.hidden&&listening)update(fHeading);});
-})();
+        // 初始化
+        function init() {
+            drawLuopan();
+            updateAngleDisplay();
+            initEvents();
+        }
+
+        init();
+    })();
 </script>
 </body>
 </html>
